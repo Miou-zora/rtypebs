@@ -1,1 +1,0 @@
-/usr/bin/c++  -std=c++17 -Wall -Werror -Wextra -Wshadow -Wuninitialized CMakeFiles/untitled.dir/main.cpp.o -o untitled  /usr/lib64/libsfml-graphics.so.2.5.1 /usr/lib64/libsfml-window.so.2.5.1 /usr/lib64/libsfml-system.so.2.5.1 
