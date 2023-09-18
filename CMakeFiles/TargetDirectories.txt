@@ -1,0 +1,3 @@
+/home/miouzora/Epitech/B-CPP-500-NAN-5-1-bsrtype-alexandre.franquet/CMakeFiles/untitled.dir
+/home/miouzora/Epitech/B-CPP-500-NAN-5-1-bsrtype-alexandre.franquet/CMakeFiles/edit_cache.dir
+/home/miouzora/Epitech/B-CPP-500-NAN-5-1-bsrtype-alexandre.franquet/CMakeFiles/rebuild_cache.dir
