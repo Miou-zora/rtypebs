@@ -16,11 +16,11 @@
 
 sf::RenderWindow window(sf::VideoMode(1920, 1080), "B-SRType");
 
-void draw_system(registry &reg)
+void draw_system(registry &reg,
+    sparse_array<component::position> const &positions,
+    sparse_array<component::drawable> &sprites)
 {
-    auto &positions = reg.get_components<component::position>();
-    auto &sprites = reg.get_components<component::drawable>();
-
+    (void)reg;
     for (size_t i = 0; i < positions.size() && i < sprites.size(); ++i)
     {
         auto &pos = positions[i];

@@ -12,11 +12,11 @@
 #include "position.hpp"
 #include "velocity.hpp"
 
-void position_system(registry &reg)
+void position_system(registry &reg,
+    sparse_array<component::position> &positions,
+    sparse_array<component::velocity> const &velocities)
 {
-    auto &positions = reg.get_components<component::position>();
-    auto &velocities = reg.get_components<component::velocity>();
-
+    (void)reg;
     for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i)
     {
         auto const &pos = positions[i];

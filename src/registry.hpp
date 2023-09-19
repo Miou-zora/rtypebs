@@ -19,16 +19,17 @@ class registry
 {
 public:
     registry() {}
+    ~registry() {}
 
     template <class Component>
     sparse_array<Component> &register_component()
     {
         _components[std::type_index(typeid(Component))] = std::make_pair(sparse_array<Component>(),
-            [](registry &reg, entity_t const &entity)
-        {
-            sparse_array<Component> &arr = reg.get_components<Component>();
-            arr.erase(entity.id());
-        });
+                                                                         [](registry &reg, entity_t const &entity)
+                                                                         {
+                                                                             sparse_array<Component> &arr = reg.get_components<Component>();
+                                                                             arr.erase(entity.id());
+                                                                         });
         return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].first));
     }
 
@@ -57,7 +58,8 @@ public:
 
     void kill_entity(entity_t const &e)
     {
-        for (auto &component : _components) {
+        for (auto &component : _components)
+        {
             component.second.second(*this, e);
         }
     }
@@ -85,9 +87,33 @@ public:
         arr.erase(from.id());
     }
 
+    template <class... Components, typename Function>
+    void add_system(Function &&f)
+    {
+        _systems.push_back([f](registry &reg){
+            f(reg, reg.get_components<Components>()...);
+        });
+    }
+    // or
+    template <class... Components, typename Function>
+    void add_system(Function const &f)
+    {
+        _systems.push_back([f](registry &reg){
+            f(reg, reg.get_components<Components>()...);
+        });
+    }
+
+    void run_systems()
+    {
+        for (auto &system : _systems)
+        {
+            system(*this);
+        }
+    }
+
 private:
     std::unordered_map<std::type_index, std::pair<std::any, std::function<void(registry &, entity_t const &)>>> _components;
+    std::vector<std::function<void(registry &)>> _systems;
 };
-
 
 #endif /* !REGISTRY_HPP_ */

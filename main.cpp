@@ -18,6 +18,10 @@ int main(int ac, char **av)
 
     registry reg;
 
+    reg.add_system<component::controllable, component::velocity>(control_system);
+    reg.add_system<component::position, component::velocity>(position_system);
+    reg.add_system<component::position, component::drawable>(draw_system);
+
     reg.register_component<component::position>();
     reg.register_component<component::velocity>();
     reg.register_component<component::controllable>();
@@ -25,7 +29,7 @@ int main(int ac, char **av)
 
     entity_t player = reg.spawn_entity();
 
-    reg.add_component<component::position>(player, component::position(0, 0));
+    reg.add_component<component::position>(player, component::position(50, 50));
     reg.add_component<component::velocity>(player, component::velocity(0, 0));
     reg.add_component<component::controllable>(player, component::controllable());
     reg.add_component<component::drawable>(player, component::drawable());
@@ -38,9 +42,7 @@ int main(int ac, char **av)
 
         window.clear(sf::Color::Black);
 
-        control_system(reg);
-        position_system(reg);
-        draw_system(reg);
+        reg.run_systems();
 
         window.display();
     }

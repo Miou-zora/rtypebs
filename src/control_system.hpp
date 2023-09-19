@@ -12,11 +12,11 @@
 #include "controllable.hpp"
 #include "velocity.hpp"
 
-void control_system(registry &reg)
+void control_system(registry &reg,
+    sparse_array<component::controllable> const &controllables,
+    sparse_array<component::velocity> &velocities)
 {
-    auto &controllables = reg.get_components<component::controllable>();
-    auto &velocities = reg.get_components<component::velocity>();
-
+    (void)reg;
     for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i)
     {
         auto &cont = controllables[i];
