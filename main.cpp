@@ -10,6 +10,8 @@
 #include "position_system.hpp"
 #include "control_system.hpp"
 #include "drawable.hpp"
+#include "zipper_iterator.hpp"
+#include "zipper.hpp"   
 
 int main(int ac, char **av)
 {
