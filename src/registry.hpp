@@ -72,11 +72,12 @@ public:
         arr.insert_at(to.id(), std::forward<Component>(c));
         return (arr[to.id()]);
     }
+
     template <typename Component, typename... Params>
     typename sparse_array<Component>::reference_type emplace_component(entity_t const &to, Params &&...p)
     {
         sparse_array<Component> &arr = get_components<Component>();
-        arr.emplace(to.id(), std::forward<Params>(p)...);
+        arr.emplace_at(to.id(), std::forward<Params>(p)...);
         return (arr[to.id()]);
     }
 
@@ -90,17 +91,15 @@ public:
     template <class... Components, typename Function>
     void add_system(Function &&f)
     {
-        _systems.push_back([f](registry &reg){
-            f(reg, reg.get_components<Components>()...);
-        });
+        _systems.push_back([f](registry &reg)
+                           { f(reg, reg.get_components<Components>()...); });
     }
     // or
     template <class... Components, typename Function>
     void add_system(Function const &f)
     {
-        _systems.push_back([f](registry &reg){
-            f(reg, reg.get_components<Components>()...);
-        });
+        _systems.push_back([f](registry &reg)
+                           { f(reg, reg.get_components<Components>()...); });
     }
 
     void run_systems()
@@ -112,7 +111,7 @@ public:
     }
 
 private:
-    std::unordered_map<std::type_index, std::pair<std::any, std::function<void(registry &, entity_t const &)>>> _components;
+    std::unordered_map<std::type_index, std::pair<std::any, std::function<void(registry &, entity_t const &)>>> _components; // TODO: switch from pair to class
     std::vector<std::function<void(registry &)>> _systems;
 };
 

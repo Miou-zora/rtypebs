@@ -8,15 +8,16 @@
 #ifndef POSITION_HPP_
 #define POSITION_HPP_
 
-namespace component {
-class position
+namespace component
 {
-public:
-    position(int _x, int _y) : x(_x), y(_y) {}
+    class position // TODO: transform this into a struct
+    {
+    public:
+        position(int _x, int _y) : x(_x), y(_y) {}
 
-    int x;
-    int y;
-};
+        int x;
+        int y;
+    };
 };
 
 #endif /* !POSITION_HPP_ */

@@ -15,15 +15,26 @@ class zipper
 {
 public:
     using iterator = zipper_iterator<Containers...>;
-    using iterator_tuple = typename iterator ::iterator_tuple;
-    zipper(Containers &...cs);
-    iterator begin();
-    iterator end();
+    using iterator_tuple = typename iterator::iterator_tuple;
+    zipper(Containers &...cs)
+    {
+        _begin = iterator_tuple(cs.begin()...);
+        _end = iterator_tuple(cs.end()...);
+        _size = _compute_size(cs...);
+    }
+    iterator begin()
+    {
+        return (iterator(_begin, _size));
+    }
+
+    iterator end()
+    {
+        return (iterator(_end, 0));
+    }
 
 private:
     // helper function to know the maximum index of our iterators .
-    static size_t _compute_size(Containers &...containers);
-    // helper function to compute an iterator_tuple that will allow us to build our end iterator.static iterator_tuple _compute_end(Containers &...containers);
+    static size_t _compute_size(Containers &...containers);    // helper function to compute an iterator_tuple that will allow us to build our end iterator.static iterator_tuple _compute_end(Containers &...containers);
 
 private:
     iterator_tuple _begin;

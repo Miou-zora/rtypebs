@@ -10,6 +10,7 @@
 
 #include <tuple>
 #include <iterator>
+#include <utility>
 
 namespace containers
 {
@@ -21,7 +22,7 @@ template <class... Containers>
 class zipper_iterator
 {
     template <class Container>
-    using iterator_t = decltype(Container::begin()); // type of Container :: begin () return value
+    using iterator_t = decltype(std::declval<Container>().begin());
     template <class Container>
     using it_reference_t = typename iterator_t<Container>::reference;
 
@@ -36,8 +37,11 @@ public:
     friend containers::zipper<Containers...>
     zipper_iterator(iterator_tuple const &it_tuple, size_t max)
     {
-        (void)it_tuple;
-        (void)max;
+        zipper_iterator it;
+        it._current = it_tuple;
+        it._max = max;
+        it._idx = 0;
+        return (it);
     }
 
 public:
@@ -47,44 +51,71 @@ public:
         this->_max = z._max;
         this->_idx = z._idx;
     }
-    zipper_iterator operator++();
+    zipper_iterator operator++()
+    {
+        incr_all(_seq);
+        ++_idx;
+        return (*this);
+    }
+
     zipper_iterator &operator++(int);
-    value_type operator*();
-    value_type operator->();
+    value_type operator*()
+    {
+        return (to_value(_seq));
+    }
+
+    value_type operator->()
+    {
+        return (to_value(_seq));
+    }
     friend bool operator==(zipper_iterator const &lhs, zipper_iterator const &rhs)
     {
-        (void)lhs;
-        (void)rhs;
+        if (lhs._idx != rhs._idx)
+            return (false);
+        if (std::tie(lhs._current) != std::tie(rhs._current))
+            return (false);
+        if (lhs._max != rhs._max)
+            return (false);
         return (true);
     }
     friend bool operator!=(zipper_iterator const &lhs, zipper_iterator const &rhs)
     {
-        (void)lhs;
-        (void)rhs;
-        return (false);
+        return (!(lhs == rhs));
     }
 
 private:
     // Increment every iterator at the same time . It also skips to the next value if one of the pointed to std ::optional does not contains a value.
     template <size_t... Is>
-    void incr_all(std::index_sequence<Is...>)
+    void incr_all(std::index_sequence<Is...> seq)
     {
-
+        for (auto &&i : {std::get<Is>(_current)...}) {
+            if (i.has_value())
+                i++;
+        }
     }
 
     // check if every std :: optional are set .
     template <size_t... Is>
-    bool all_set(std::index_sequence<Is...>);
+    bool all_set(std::index_sequence<Is...> seq)
+    {
+        bool is_all_set = true;
+        for (auto &&i : {std::get<Is>(_current)...})
+            is_all_set &= i.has_value();
+        return (is_all_set);
+    }
 
     // return a tuple of reference to components .
     template <size_t... Is>
-    value_type to_value(std::index_sequence<Is...>);
+    value_type to_value(std::index_sequence<Is...> seq)
+    {
+        // return (std::tie(seq));
+    }
 
 private:
     iterator_tuple _current;
     size_t _max; // compare this value to _idx to prevent infinite loop .
     size_t _idx;
-    static constexpr std ::index_sequence_for<Containers...> _seq{};
+    static constexpr std::index_sequence_for<Containers...> _seq{};
 };
 
 #endif /* !ZIPPER_ITERATOR_HPP_ */

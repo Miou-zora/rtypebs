@@ -10,33 +10,34 @@
 
 #include <SFML/Graphics.hpp>
 
-namespace component {
-class controllable
+namespace component
 {
-public:
-    controllable() = default;
-    ~controllable() = default;
-
-    bool is_key_up_pressed() const
+    class controllable // TODO: think about a better class / maybe a struct
     {
-        return sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
-    }
+    public:
+        controllable() = default;
+        ~controllable() = default;
 
-    bool is_key_down_pressed() const
-    {
-        return sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
-    }
+        bool is_key_up_pressed() const
+        {
+            return sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
+        }
 
-    bool is_key_left_pressed() const
-    {
-        return sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
-    }
+        bool is_key_down_pressed() const
+        {
+            return sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
+        }
 
-    bool is_key_right_pressed() const
-    {
-        return sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
-    }
-};
+        bool is_key_left_pressed() const
+        {
+            return sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
+        }
+
+        bool is_key_right_pressed() const
+        {
+            return sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
+        }
+    };
 };
 
 #endif /* !CONTROLLABLE_HPP_ */

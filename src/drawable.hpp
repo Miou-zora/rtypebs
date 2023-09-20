@@ -11,27 +11,28 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
-namespace component {
-class drawable
+namespace component
 {
-public:
-    drawable()
+    class drawable // TODO: think about a better class / maybe a struct
     {
-        _shape.setSize(sf::Vector2f(50, 50));
-        _shape.setFillColor(sf::Color::White);
-    }
+    public:
+        drawable()
+        {
+            _shape.setSize(sf::Vector2f(50, 50));
+            _shape.setFillColor(sf::Color::White);
+        }
 
-    virtual ~drawable() = default;
+        virtual ~drawable() = default;
 
-    void draw(sf::RenderWindow &window, sf::Vector2f pos)
-    {
-        _shape.setPosition(pos);
-        window.draw(_shape);
-    }
+        void draw(sf::RenderWindow &window, sf::Vector2f pos)
+        {
+            _shape.setPosition(pos);
+            window.draw(_shape);
+        }
 
-protected:
-    sf::RectangleShape _shape;
-};
+    protected:
+        sf::RectangleShape _shape;
+    };
 };
 
 #endif /* !DRAWABLE_HPP_ */
