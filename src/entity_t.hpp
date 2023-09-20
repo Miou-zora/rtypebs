@@ -14,11 +14,6 @@ class entity_t
 public:
     explicit entity_t(std::size_t id) : _id(id){};
 
-    std::size_t id() const // TODO: remove this
-    {
-        return (_id);
-    }
-
     operator std::size_t() const
     {
         return (_id);

@@ -28,7 +28,7 @@ public:
                                                                          [](registry &reg, entity_t const &entity)
                                                                          {
                                                                              sparse_array<Component> &arr = reg.get_components<Component>();
-                                                                             arr.erase(entity.id());
+                                                                             arr.erase(entity);
                                                                          });
         return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].first));
     }
@@ -69,23 +69,23 @@ public:
                                                                    Component &&c)
     {
         sparse_array<Component> &arr = get_components<Component>();
-        arr.insert_at(to.id(), std::forward<Component>(c));
-        return (arr[to.id()]);
+        arr.insert_at(to, std::forward<Component>(c));
+        return (arr[to]);
     }
 
     template <typename Component, typename... Params>
     typename sparse_array<Component>::reference_type emplace_component(entity_t const &to, Params &&...p)
     {
         sparse_array<Component> &arr = get_components<Component>();
-        arr.emplace_at(to.id(), std::forward<Params>(p)...);
-        return (arr[to.id()]);
+        arr.emplace_at(to, std::forward<Params>(p)...);
+        return (arr[to]);
     }
 
     template <typename Component>
     void remove_component(entity_t const &from)
     {
         sparse_array<Component> &arr = get_components<Component>();
-        arr.erase(from.id());
+        arr.erase(from);
     }
 
     template <class... Components, typename Function>
