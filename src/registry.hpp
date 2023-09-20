@@ -47,7 +47,7 @@ public:
 
     entity_t spawn_entity()
     {
-        static int id = 0;
+        static int id = 0; // TODO: check if there is dead entities, if so, use the first one to create a new entity
         return (entity_t(id++));
     }
 
