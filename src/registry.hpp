@@ -17,6 +17,13 @@
 
 class registry
 {
+private:
+    struct component_t
+    {
+        std::any list_of_instances;
+        std::function<void(registry &, entity_t const &)> destructor;
+    };
+
 public:
     registry() {}
     ~registry() {}
@@ -24,25 +31,26 @@ public:
     template <class Component>
     sparse_array<Component> &register_component()
     {
-        _components[std::type_index(typeid(Component))] = std::make_pair(sparse_array<Component>(),
-                                                                         [](registry &reg, entity_t const &entity)
-                                                                         {
-                                                                             sparse_array<Component> &arr = reg.get_components<Component>();
-                                                                             arr.erase(entity);
-                                                                         });
-        return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].first));
+        _components[std::type_index(typeid(Component))] = component_t{
+            sparse_array<Component>(),
+            [](registry &reg, entity_t const &entity)
+            {
+                sparse_array<Component> &arr = reg.get_components<Component>();
+                arr.erase(entity);
+            }};
+        return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].list_of_instances));
     }
 
     template <class Component>
     sparse_array<Component> &get_components()
     {
-        return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].first));
+        return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].list_of_instances));
     }
 
     template <class Component>
     sparse_array<Component> const &get_components() const
     {
-        return (std::any_cast<sparse_array<Component> const &>(_components.at(std::type_index(typeid(Component))).first));
+        return (std::any_cast<sparse_array<Component> const &>(_components.at(std::type_index(typeid(Component))).list_of_instances));
     }
 
     entity_t spawn_entity()
@@ -68,7 +76,7 @@ public:
     {
         for (auto &component : _components)
         {
-            component.second.second(*this, e);
+            component.second.destructor(*this, e);
         }
         _dead_entities.push_back(e);
     }
@@ -120,7 +128,7 @@ public:
     }
 
 private:
-    std::unordered_map<std::type_index, std::pair<std::any, std::function<void(registry &, entity_t const &)>>> _components; // TODO: switch from pair to class
+    std::unordered_map<std::type_index, component_t> _components;
     std::vector<std::function<void(registry &)>> _systems;
     std::vector<entity_t> _dead_entities;
 };
