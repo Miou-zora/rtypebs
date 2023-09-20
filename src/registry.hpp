@@ -47,8 +47,16 @@ public:
 
     entity_t spawn_entity()
     {
-        static int id = 0; // TODO: check if there is dead entities, if so, use the first one to create a new entity
-        return (entity_t(id++));
+        static int id = 0;
+
+        if (_dead_entities.empty())
+        {
+            return (entity_t(id++));
+        }
+
+        entity_t e = _dead_entities.back();
+        _dead_entities.pop_back();
+        return (e);
     }
 
     entity_t entity_from_index(std::size_t idx)
@@ -62,6 +70,7 @@ public:
         {
             component.second.second(*this, e);
         }
+        _dead_entities.push_back(e);
     }
 
     template <typename Component>
@@ -113,7 +122,7 @@ public:
 private:
     std::unordered_map<std::type_index, std::pair<std::any, std::function<void(registry &, entity_t const &)>>> _components; // TODO: switch from pair to class
     std::vector<std::function<void(registry &)>> _systems;
-    // TODO: add a vector of dead entities
+    std::vector<entity_t> _dead_entities;
 };
 
 #endif /* !REGISTRY_HPP_ */

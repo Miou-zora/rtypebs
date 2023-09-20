@@ -129,7 +129,9 @@ public:
 
     void erase(size_type pos) // TODO: use allocator traits
     {
-        _data.erase(_data.begin() + pos);
+        if (_data.size() <= pos)
+            return;
+        _data[pos].reset();
     }
 
     size_type get_index(value_type const &other) const
