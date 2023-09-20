@@ -113,6 +113,7 @@ public:
 private:
     std::unordered_map<std::type_index, std::pair<std::any, std::function<void(registry &, entity_t const &)>>> _components; // TODO: switch from pair to class
     std::vector<std::function<void(registry &)>> _systems;
+    // TODO: add a vector of dead entities
 };
 
 #endif /* !REGISTRY_HPP_ */
