@@ -94,7 +94,7 @@ public:
         return (_data.size());
     }
 
-    reference_type insert_at(size_type pos, Component const &other) // TODO: use allocator traits and remove component if not empty
+    reference_type insert_at(size_type pos, Component const &other) // TODO: use allocator traits
     {
         if (_data.size() <= pos) {
             _data.resize(pos + 1);
