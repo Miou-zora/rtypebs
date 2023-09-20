@@ -11,21 +11,17 @@
 #include "registry.hpp"
 #include "controllable.hpp"
 #include "velocity.hpp"
+#include "zipper.hpp"
 
 void control_system(registry &reg,
     sparse_array<component::controllable> const &controllables,
     sparse_array<component::velocity> &velocities)
 {
     (void)reg;
-    for (size_t i = 0; i < controllables.size() && i < velocities.size(); ++i)
+    for (auto &&[cont, vel] : zipper(controllables, velocities))
     {
-        auto &cont = controllables[i];
-        auto &vel = velocities[i];
-
-        if (cont.has_value() && vel.has_value()) {
-            velocities[i].value().vx = (cont.value().is_key_right_pressed() - cont.value().is_key_left_pressed());
-            velocities[i].value().vy = (cont.value().is_key_down_pressed() - cont.value().is_key_up_pressed());
-        }
+        vel.value().vx = (cont.value().is_key_right_pressed() - cont.value().is_key_left_pressed());
+        vel.value().vy = (cont.value().is_key_down_pressed() - cont.value().is_key_up_pressed());
     }
 }
 

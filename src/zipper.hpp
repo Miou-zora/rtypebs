@@ -19,7 +19,7 @@ public:
     zipper(Containers &...cs)
     {
         _begin = iterator_tuple(cs.begin()...);
-        _end = iterator_tuple(cs.end()...);
+        _end = _compute_end(cs...);
         _size = _compute_size(cs...);
     }
     iterator begin()
@@ -29,12 +29,22 @@ public:
 
     iterator end()
     {
-        return (iterator(_end, 0));
+        return (iterator(_end, _size));
     }
 
 private:
     // helper function to know the maximum index of our iterators .
-    static size_t _compute_size(Containers &...containers);    // helper function to compute an iterator_tuple that will allow us to build our end iterator.static iterator_tuple _compute_end(Containers &...containers);
+    static size_t _compute_size(Containers &...containers)
+    {
+        return (std::min({containers.size()...}));
+    }
+
+    // helper function to compute an iterator_tuple that will allow us to build our end iterator.
+    static iterator_tuple _compute_end(Containers &...containers)
+    {
+        size_t size = _compute_size(containers...);
+        return (iterator_tuple((containers.begin() + size)...));
+    }
 
 private:
     iterator_tuple _begin;

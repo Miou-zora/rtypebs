@@ -27,21 +27,19 @@ class zipper_iterator
     using it_reference_t = typename iterator_t<Container>::reference;
 
 public:
-    using value_type = std::tuple<it_reference_t<Containers>&...>;
+    using value_type = std::tuple<it_reference_t<Containers> &...>;
     using reference = value_type;
     using pointer = void;
     using difference_type = size_t;
     using iterator_category = std::input_iterator_tag;
     using iterator_tuple = std::tuple<iterator_t<Containers>...>;
     // If we want zipper_iterator to be built by zipper only .
-    friend containers::zipper<Containers...>
+    friend containers::zipper<Containers...>;
     zipper_iterator(iterator_tuple const &it_tuple, size_t max)
     {
-        zipper_iterator it;
-        it._current = it_tuple;
-        it._max = max;
-        it._idx = 0;
-        return (it);
+        this->_current = it_tuple;
+        this->_max = max;
+        this->_idx = 0;
     }
 
 public:
@@ -53,12 +51,20 @@ public:
     }
     zipper_iterator operator++()
     {
-        incr_all(_seq);
-        ++_idx;
+        if (_idx < _max)
+        {
+            incr_all(_seq);
+        }
         return (*this);
     }
 
-    zipper_iterator &operator++(int);
+    zipper_iterator &operator++(int)
+    {
+        zipper_iterator tmp(*this);
+        incr_all(_seq);
+        return (tmp);
+    }
+
     value_type operator*()
     {
         return (to_value(_seq));
@@ -70,12 +76,12 @@ public:
     }
     friend bool operator==(zipper_iterator const &lhs, zipper_iterator const &rhs)
     {
-        if (lhs._idx != rhs._idx)
+        if (std::tie(lhs._current) != std::tie(rhs._current)) {
             return (false);
-        if (std::tie(lhs._current) != std::tie(rhs._current))
-            return (false);
-        if (lhs._max != rhs._max)
-            return (false);
+        }
+        // if (lhs._max != rhs._max || lhs._idx != rhs._idx) { // TODO: check if this is necessary, it seems to be working without it but ask to Pugo
+        //     return (false);
+        // }
         return (true);
     }
     friend bool operator!=(zipper_iterator const &lhs, zipper_iterator const &rhs)
@@ -88,27 +94,28 @@ private:
     template <size_t... Is>
     void incr_all(std::index_sequence<Is...> seq)
     {
-        for (auto &&i : {std::get<Is>(_current)...}) {
-            if (i.has_value())
-                i++;
-        }
+        do {
+            if (_idx >= _max) {
+                return;
+            }
+            (++std::get<Is>(_current), ...);
+
+            _idx++;
+        } while (!all_set(seq));
     }
 
     // check if every std :: optional are set .
     template <size_t... Is>
-    bool all_set(std::index_sequence<Is...> seq)
+    bool all_set(std::index_sequence<Is...>)
     {
-        bool is_all_set = true;
-        for (auto &&i : {std::get<Is>(_current)...})
-            is_all_set &= i.has_value();
-        return (is_all_set);
+        return ((std::get<Is>(_current)->has_value() && ...));
     }
 
     // return a tuple of reference to components .
     template <size_t... Is>
-    value_type to_value(std::index_sequence<Is...> seq)
+    value_type to_value(std::index_sequence<Is...>)
     {
-        // return (std::tie(seq));
+        return (std::tie(*std::get<Is>(_current)...));
     }
 
 private:
