@@ -10,13 +10,10 @@
 
 namespace component
 {
-    class velocity // TODO: transform this into a struct
-    {
-    public:
-        velocity(int x, int y) : vx(x), vy(y) {}
-
-        int vx;
-        int vy;
+    struct velocity {
+        velocity(float _vx, float _vy) : vx(_vx), vy(_vy) {};
+        float vx;
+        float vy;
     };
 };
 

@@ -10,13 +10,10 @@
 
 namespace component
 {
-    class position // TODO: transform this into a struct
-    {
-    public:
-        position(int _x, int _y) : x(_x), y(_y) {}
-
-        int x;
-        int y;
+    struct position {
+        position(float _x, float _y) : x(_x), y(_y) {};
+        float x;
+        float y;
     };
 };
 
