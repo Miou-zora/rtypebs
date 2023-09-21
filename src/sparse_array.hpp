@@ -13,7 +13,7 @@
 #include <memory>
 #include <iostream>
 
-template <typename Component, class Allocator = std::allocator<Component>>
+template <typename Component, class Allocator = std::allocator<std::optional<Component>>>
 class sparse_array
 {
 public:
@@ -39,6 +39,7 @@ public:
     }
 
     ~sparse_array() = default;
+
     sparse_array &operator=(sparse_array const &other)
     {
         _data = other._data;
