@@ -9,9 +9,8 @@
 #include "draw_system.hpp"
 #include "position_system.hpp"
 #include "control_system.hpp"
+#include "logging_system.hpp"
 #include "drawable.hpp"
-#include "zipper_iterator.hpp"
-#include "zipper.hpp"   
 
 int main(int ac, char **av)
 {
@@ -23,6 +22,7 @@ int main(int ac, char **av)
     reg.add_system<component::controllable, component::velocity>(control_system);
     reg.add_system<component::position, component::velocity>(position_system);
     reg.add_system<component::position, component::drawable>(draw_system);
+    reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
     reg.register_component<component::velocity>();
@@ -35,6 +35,13 @@ int main(int ac, char **av)
     reg.add_component<component::velocity>(player, component::velocity(0, 0));
     reg.add_component<component::controllable>(player, component::controllable());
     reg.add_component<component::drawable>(player, component::drawable());
+
+    entity_t enemy = reg.spawn_entity();
+
+    reg.add_component<component::position>(enemy, component::position(200, 200));
+    reg.add_component<component::velocity>(enemy, component::velocity(0, 0));
+    reg.add_component<component::drawable>(enemy, component::drawable());
+
 
     while (window.isOpen()) {
         sf::Event event;
