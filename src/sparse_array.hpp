@@ -8,10 +8,10 @@
 #ifndef TEST_HPP_
 #define TEST_HPP_
 
-#include <optional>
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <optional>
 
 template <typename Component, class Allocator = std::allocator<std::optional<Component>>>
 class sparse_array
