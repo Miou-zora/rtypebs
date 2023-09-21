@@ -16,22 +16,25 @@ namespace component
     class drawable // TODO: think about a better class / maybe a struct
     {
     public:
-        drawable()
+        drawable(std::shared_ptr<sf::Drawable> drawable_instance) : _drawable(drawable_instance)
         {
-            _shape.setSize(sf::Vector2f(50, 50));
-            _shape.setFillColor(sf::Color::White);
+
         }
 
-        virtual ~drawable() = default;
+        ~drawable() = default;
 
         void draw(sf::RenderWindow &window, sf::Vector2f pos)
         {
-            _shape.setPosition(pos);
-            window.draw(_shape);
+            if (!_drawable)
+                return;
+            sf::Transform transform;
+
+            transform.translate(pos);
+            window.draw(*_drawable, transform);
         }
 
-    protected:
-        sf::RectangleShape _shape;
+    private:
+        std::shared_ptr<sf::Drawable> _drawable;
     };
 };
 

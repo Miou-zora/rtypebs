@@ -33,14 +33,15 @@ int main(int ac, char **av)
 
     reg.add_component<component::position>(player, component::position(50, 50));
     reg.add_component<component::velocity>(player, component::velocity(0, 0));
-    reg.add_component<component::controllable>(player, component::controllable());
-    reg.add_component<component::drawable>(player, component::drawable());
+    component::controllable controllable;
+    reg.add_component<component::controllable>(player, std::move(controllable));
+    reg.add_component<component::drawable>(player, component::drawable(std::make_shared<sf::RectangleShape>(sf::Vector2f(50, 50))));
 
     entity_t enemy = reg.spawn_entity();
 
     reg.add_component<component::position>(enemy, component::position(200, 200));
     reg.add_component<component::velocity>(enemy, component::velocity(0, 0));
-    reg.add_component<component::drawable>(enemy, component::drawable());
+    reg.add_component<component::drawable>(enemy, component::drawable(std::make_shared<sf::CircleShape>(30)));
 
 
     while (window.isOpen()) {
