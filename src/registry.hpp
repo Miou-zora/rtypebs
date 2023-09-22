@@ -94,7 +94,7 @@ public:
     typename sparse_array<Component>::reference_type emplace_component(entity_t const &to, Params &&...p)
     {
         sparse_array<Component> &arr = get_components<Component>();
-        arr.emplace_at(to, std::forward<Params>(p)...);
+        arr.emplace_at(to, std::in_place, std::forward<Params>(p)...);
         return (arr[to]);
     }
 

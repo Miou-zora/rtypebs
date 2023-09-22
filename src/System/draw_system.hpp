@@ -24,7 +24,12 @@ void draw_system(registry &reg,
     (void)reg;
     for (auto &&[pos, sprite] : zipper(positions, sprites))
     {
-        sprite.value().draw(window, sf::Vector2f(pos.value().x, pos.value().y));
+        if (sprite.value().Drawable == nullptr)
+            continue;
+        sf::Transform transform;
+        transform.translate(pos.value().x, pos.value().y);
+
+        window.draw(*sprite.value().Drawable, transform);
     }
 }
 
