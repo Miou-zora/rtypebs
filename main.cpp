@@ -13,6 +13,7 @@
 #include "hurtbox_display_system.hpp"
 #include "collide_system.hpp"
 #include "drawable.hpp"
+#include "damage_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -25,6 +26,7 @@ int main(int ac, char **av)
     reg.add_system<component::controllable, component::velocity>(control_system);
     reg.add_system<component::position, component::velocity>(position_system);
     reg.add_system<component::position, component::drawable>(draw_system);
+    reg.add_system<component::collider, component::health>(damage_system);
     reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
@@ -34,6 +36,8 @@ int main(int ac, char **av)
     reg.register_component<component::drawable>();
     reg.register_component<component::collider>();
     reg.register_component<component::displayable_hurtbox>();
+    reg.register_component<component::health>();
+    reg.register_component<component::damage>();
 
     entity_t player = reg.spawn_entity();
     reg.emplace_component<component::position>(player, 50, 50);
@@ -47,6 +51,7 @@ int main(int ac, char **av)
     controllable.is_key_left_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)); };
     controllable.is_key_right_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)); };
     reg.add_component<component::controllable>(player, std::move(controllable));
+    reg.add_component<component::health>(player, 100);
 
     entity_t enemy = reg.spawn_entity();
     reg.emplace_component<component::position>(enemy, 200, 200);
@@ -54,6 +59,7 @@ int main(int ac, char **av)
     reg.emplace_component<component::drawable>(enemy, std::make_shared<sf::CircleShape>(30));
     reg.emplace_component<component::collider>(enemy, 60, 60);
     reg.emplace_component<component::displayable_hurtbox>(enemy, true);
+    reg.add_component<component::damage>(enemy, component::damage(10));
 
 
     while (window.isOpen()) {
