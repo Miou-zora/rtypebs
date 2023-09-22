@@ -10,8 +10,4 @@
 namespace component
 {
     typedef bool displayable_hurtbox;
-    // struct displayable_hurtbox
-    // {
-    //     bool 
-    // };
 };

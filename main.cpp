@@ -11,6 +11,7 @@
 #include "control_system.hpp"
 #include "logging_system.hpp"
 #include "hurtbox_display_system.hpp"
+#include "collide_system.hpp"
 #include "drawable.hpp"
 
 int main(int ac, char **av)
@@ -20,24 +21,25 @@ int main(int ac, char **av)
 
     registry reg;
 
+    reg.add_system<component::collider, component::position>(collide_system);
     reg.add_system<component::controllable, component::velocity>(control_system);
     reg.add_system<component::position, component::velocity>(position_system);
     reg.add_system<component::position, component::drawable>(draw_system);
-    reg.add_system<component::hurtbox, component::displayable_hurtbox, component::position>(hurtbox_display_system);
+    reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
     reg.register_component<component::velocity>();
     reg.register_component<component::controllable>();
     reg.register_component<component::drawable>();
-    reg.register_component<component::hurtbox>();
+    reg.register_component<component::collider>();
     reg.register_component<component::displayable_hurtbox>();
 
     entity_t player = reg.spawn_entity();
     reg.emplace_component<component::position>(player, 50, 50);
     reg.emplace_component<component::velocity>(player, 0, 0);
     reg.emplace_component<component::drawable>(player, std::make_shared<sf::RectangleShape>(sf::Vector2f(50, 50)));
-    reg.emplace_component<component::hurtbox>(player, 50, 50);
+    reg.emplace_component<component::collider>(player, 50, 50);
     reg.emplace_component<component::displayable_hurtbox>(player, true);
     component::controllable controllable;
     controllable.is_key_up_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)); };
@@ -50,7 +52,7 @@ int main(int ac, char **av)
     reg.emplace_component<component::position>(enemy, 200, 200);
     reg.emplace_component<component::velocity>(enemy, 0, 0);
     reg.emplace_component<component::drawable>(enemy, std::make_shared<sf::CircleShape>(30));
-    reg.emplace_component<component::hurtbox>(enemy, 60, 60);
+    reg.emplace_component<component::collider>(enemy, 60, 60);
     reg.emplace_component<component::displayable_hurtbox>(enemy, true);
 
 
