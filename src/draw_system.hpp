@@ -13,22 +13,18 @@
 #include "position.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include "zipper.hpp"
 
 sf::RenderWindow window(sf::VideoMode(1920, 1080), "B-SRType");
 
-void draw_system(registry &reg)
+void draw_system(registry &reg,
+    sparse_array<component::position> const &positions,
+    sparse_array<component::drawable> &sprites)
 {
-    auto &positions = reg.get_components<component::position>();
-    auto &sprites = reg.get_components<component::drawable>();
-
-    for (size_t i = 0; i < positions.size() && i < sprites.size(); ++i)
+    (void)reg;
+    for (auto &&[pos, sprite] : zipper(positions, sprites))
     {
-        auto &pos = positions[i];
-        auto &sprite = sprites[i];
-
-        if (pos.has_value() && sprite.has_value()) {
-            sprite.value().draw(window, sf::Vector2f(pos.value().x, pos.value().y));
-        }
+        sprite.value().draw(window, sf::Vector2f(pos.value().x, pos.value().y));
     }
 }
 

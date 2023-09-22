@@ -95,34 +95,44 @@ public:
         return (_data.size());
     }
 
-    reference_type insert_at(size_type pos, Component const &other)
+    reference_type insert_at(size_type pos, Component const &other) // TODO: use allocator traits
     {
         if (_data.size() <= pos) {
             _data.resize(pos + 1);
+        } else {
+            if (_data[pos].has_value()) {
+                _data[pos].reset();
+            }
         }
         _data[pos] = other;
         return (_data[pos]);
     }
 
-    reference_type insert_at(size_type pos, Component &&other)
+    reference_type insert_at(size_type pos, Component &&other) // TODO: use allocator traits
     {
         if (_data.size() <= pos) {
             _data.resize(pos + 1);
+        } else {
+            if (_data[pos].has_value()) {
+                _data[pos].reset();
+            }
         }
         _data[pos] = std::move(other);
         return (_data[pos]);
     }
 
     template <class... Params>
-    reference_type emplace_at(size_type pos, Params &&...other)
+    reference_type emplace_at(size_type pos, Params &&...other) // TODO: Axel, check this
     {
         _data.emplace(_data.begin() + pos, std::forward<Params>(other)...);
         return (_data[pos]);
     }
 
-    void erase(size_type pos)
+    void erase(size_type pos) // TODO: use allocator traits
     {
-        _data.erase(_data.begin() + pos);
+        if (_data.size() <= pos)
+            return;
+        _data[pos].reset();
     }
 
     size_type get_index(value_type const &other) const
