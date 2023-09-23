@@ -15,6 +15,7 @@
 #include "drawable.hpp"
 #include "damage_system.hpp"
 #include "path_system.hpp"
+#include "projectile_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -28,6 +29,7 @@ int main(int ac, char **av)
     reg.add_system<component::position, component::drawable>(draw_system);
     reg.add_system<component::collider, component::health>(damage_system);
     reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
+    reg.add_system<component::collider, component::projectile>(projectile_system);
     reg.add_system<component::velocity, component::path>(path_system);
     reg.add_system<component::position, component::velocity>(position_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
@@ -42,6 +44,7 @@ int main(int ac, char **av)
     reg.register_component<component::damage>();
     reg.register_component<component::enemy>();
     reg.register_component<component::player>();
+    reg.register_component<component::projectile>();
     reg.register_component<component::path>();
 
     reg.get_assets_manager().load_texture("player", "assets/player.png");
@@ -74,7 +77,6 @@ int main(int ac, char **av)
     reg.emplace_component<component::drawable>(enemy, enemy_sprite);
     reg.emplace_component<component::collider>(enemy, enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height);
     reg.emplace_component<component::displayable_hurtbox>(enemy, true);
-    reg.add_component<component::damage>(enemy, component::damage(10));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
     std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(100, vector<float>(300, 0));
@@ -86,6 +88,22 @@ int main(int ac, char **av)
     std::shared_ptr<pattern_movement> rlm = std::make_shared<reverse_linear_movement>(vector<float>(0, -100), 1);
     p.add_pattern(rlm);
     reg.add_component<component::path>(enemy, std::move(p));
+
+    entity_t projectile = reg.spawn_entity();
+    reg.emplace_component<component::position>(projectile, 1000, 200);
+    reg.emplace_component<component::velocity>(projectile, 0, 0);
+    reg.emplace_component<component::drawable>(projectile, std::make_shared<sf::RectangleShape>(sf::Vector2f(10, 5)));
+    reg.emplace_component<component::collider>(projectile, 10, 5);
+    reg.emplace_component<component::displayable_hurtbox>(projectile, true);
+    reg.add_component<component::damage>(projectile, component::damage(10));
+    reg.add_component<component::enemy>(projectile, component::enemy());
+    reg.add_component<component::projectile>(projectile, component::projectile());
+    component::path p2;
+    std::shared_ptr<pattern_movement> ilm = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 1);
+    p2.add_pattern(ilm);
+    reg.add_component<component::path>(projectile, std::move(p2));
+
+
 
 
     while (window.isOpen()) {

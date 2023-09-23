@@ -1,0 +1,24 @@
+{
+    position: {200, 200}
+    velocity: {0, 0}
+    drawable: {
+        std::shared_ptr : {
+            sf::Sprite ->
+                setTexture : {reg.get_assets_manager().get_texture("player")}
+        }
+    }
+    collider: {enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height}
+    displayable_hurtbox: { false }
+    damage: {10}
+    enemy
+    projectile
+    path {
+        .add_pattern {
+            std::shared_ptr {
+                infinite_linear_movement {
+                    vector<float>(-1, 0), 1
+                }
+            }
+        }
+    }
+}

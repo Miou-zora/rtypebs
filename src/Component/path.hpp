@@ -54,10 +54,26 @@ public:
         return (_actual_position >= _target);
     }
 
-private:
+protected:
     vector<float> _target;
     vector<float> _direction;
     vector<float> _actual_position;
+};
+
+class infinite_linear_movement : virtual public linear_movement
+{
+public:
+    infinite_linear_movement(vector<float> target, float speed = 1) : linear_movement(target, speed) {};
+
+    void update(float dt) override
+    {
+        _actual_position += _direction * dt;
+    }
+
+    bool is_finished() override
+    {
+        return (false);
+    }
 };
 
 class reverse_linear_movement : virtual public pattern_movement

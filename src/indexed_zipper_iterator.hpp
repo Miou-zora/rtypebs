@@ -39,6 +39,10 @@ public:
         this->_current = it_tuple;
         this->_max = max;
         this->_idx = 0;
+        if (_idx < _max && !all_set(_seq))
+        {
+            incr_all(_seq);
+        }
     }
 
 public:
@@ -47,6 +51,10 @@ public:
         this->_current = z._current;
         this->_max = z._max;
         this->_idx = z._idx;
+        if (_idx < _max && !all_set(_seq))
+        {
+            incr_all(_seq);
+        }
     }
     indexed_zipper_iterator operator++()
     {
@@ -60,29 +68,25 @@ public:
     indexed_zipper_iterator &operator++(int)
     {
         indexed_zipper_iterator tmp(*this);
-        incr_all(_seq);
+        if (_idx < _max)
+        {
+            incr_all(_seq);
+        }
         return (tmp);
     }
 
     value_type operator*()
     {
-        if (!all_set(_seq))
-        {
-            incr_all(_seq);
-        }
         return (to_value(_seq));
     }
 
     value_type operator->()
     {
-        if (!all_set(_seq))
-        {
-            incr_all(_seq);
-        }
         return (to_value(_seq));
     }
     friend bool operator==(indexed_zipper_iterator const &lhs, indexed_zipper_iterator const &rhs)
     {
+
         if (std::tie(lhs._current) != std::tie(rhs._current)) {
             return (false);
         }
@@ -106,7 +110,6 @@ private:
                 return;
             }
             (++std::get<Is>(_current), ...);
-
             _idx++;
         } while (!all_set(seq));
     }

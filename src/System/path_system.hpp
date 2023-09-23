@@ -17,8 +17,10 @@ void path_system(registry &reg,
                  sparse_array<component::path> &paths)
 {
     (void)reg;
-    for (auto &&[i, vel, path] : indexed_zipper(velocities, paths)) {
-        if (path.value().is_finished()) {
+    for (auto &&[i, vel, path] : indexed_zipper(velocities, paths))
+    {
+        if (path.value().is_finished())
+        {
             continue;
         }
         path.value().update(1.f);

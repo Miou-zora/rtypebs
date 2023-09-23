@@ -28,7 +28,7 @@ public:
 
     iterator end()
     {
-        return (iterator(_end, _size));
+        return (iterator(_end, 0));
     }
 
 private:

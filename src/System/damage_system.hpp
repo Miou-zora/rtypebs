@@ -39,6 +39,7 @@ void damage_system(registry &reg,
             )
             {
                 health.value().value -= reg.get_components<component::damage>()[collide_with].value().value;
+                std::cout << "Entity " << index << " took " << reg.get_components<component::damage>()[collide_with].value().value << " damage" << std::endl;
             }
         }
     }
