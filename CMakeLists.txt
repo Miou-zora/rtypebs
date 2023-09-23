@@ -21,5 +21,5 @@ set(MAIN "main.cpp")
 
 add_executable(untitled ${MAIN} ${SRC})
 find_package(SFML COMPONENTS graphics window system REQUIRED)
-target_link_libraries(untitled sfml-graphics sfml-window sfml-system)
+target_link_libraries(untitled sfml-graphics sfml-window sfml-system sfml-audio)
 

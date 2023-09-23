@@ -44,11 +44,17 @@ int main(int ac, char **av)
     reg.register_component<component::player>();
     reg.register_component<component::path>();
 
+    reg.get_assets_manager().load_texture("player", "assets/player.png");
+    reg.get_assets_manager().load_texture("enemy", "assets/enemy.png");
+
     entity_t player = reg.spawn_entity();
     reg.emplace_component<component::position>(player, 50, 50);
     reg.emplace_component<component::velocity>(player, 0, 0);
-    reg.emplace_component<component::drawable>(player, std::make_shared<sf::RectangleShape>(sf::Vector2f(50, 50)));
-    reg.emplace_component<component::collider>(player, 50, 50);
+    std::shared_ptr<sf::Sprite> player_sprite = std::make_shared<sf::Sprite>();
+    player_sprite->setTexture(reg.get_assets_manager().get_texture("player"));
+    player_sprite->setScale(0.1, 0.1);
+    reg.emplace_component<component::drawable>(player, player_sprite);
+    reg.emplace_component<component::collider>(player, player_sprite->getGlobalBounds().width, player_sprite->getGlobalBounds().height);
     reg.emplace_component<component::displayable_hurtbox>(player, true);
     component::controllable controllable;
     controllable.is_key_up_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)); };
@@ -62,12 +68,14 @@ int main(int ac, char **av)
     entity_t enemy = reg.spawn_entity();
     reg.emplace_component<component::position>(enemy, 200, 200);
     reg.emplace_component<component::velocity>(enemy, 0, 0);
-    reg.emplace_component<component::drawable>(enemy, std::make_shared<sf::CircleShape>(30));
-    reg.emplace_component<component::collider>(enemy, 60, 60);
+    std::shared_ptr<sf::Sprite> enemy_sprite = std::make_shared<sf::Sprite>();
+    enemy_sprite->setTexture(reg.get_assets_manager().get_texture("enemy"));
+    enemy_sprite->setScale(0.5, 0.5);
+    reg.emplace_component<component::drawable>(enemy, enemy_sprite);
+    reg.emplace_component<component::collider>(enemy, enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height);
     reg.emplace_component<component::displayable_hurtbox>(enemy, true);
     reg.add_component<component::damage>(enemy, component::damage(10));
     reg.add_component<component::enemy>(enemy, component::enemy());
-
     component::path p;
     std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(100, vector<float>(300, 0));
     p.add_pattern(lm1);
