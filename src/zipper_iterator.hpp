@@ -67,11 +67,17 @@ public:
 
     value_type operator*()
     {
+        if (!all_set(_seq)) {
+            incr_all(_seq);
+        }
         return (to_value(_seq));
     }
 
     value_type operator->()
     {
+        if (!all_set(_seq)) {
+            incr_all(_seq);
+        }
         return (to_value(_seq));
     }
     friend bool operator==(zipper_iterator const &lhs, zipper_iterator const &rhs)

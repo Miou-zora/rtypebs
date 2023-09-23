@@ -14,7 +14,7 @@
 #include "collide_system.hpp"
 #include "drawable.hpp"
 #include "damage_system.hpp"
-#include "path.hpp"
+#include "path_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -25,10 +25,11 @@ int main(int ac, char **av)
 
     reg.add_system<component::collider, component::position>(collide_system);
     reg.add_system<component::controllable, component::velocity>(control_system);
-    reg.add_system<component::position, component::velocity>(position_system);
     reg.add_system<component::position, component::drawable>(draw_system);
     reg.add_system<component::collider, component::health>(damage_system);
     reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
+    reg.add_system<component::velocity, component::path>(path_system);
+    reg.add_system<component::position, component::velocity>(position_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
@@ -41,6 +42,7 @@ int main(int ac, char **av)
     reg.register_component<component::damage>();
     reg.register_component<component::enemy>();
     reg.register_component<component::player>();
+    reg.register_component<component::path>();
 
     entity_t player = reg.spawn_entity();
     reg.emplace_component<component::position>(player, 50, 50);
@@ -65,6 +67,17 @@ int main(int ac, char **av)
     reg.emplace_component<component::displayable_hurtbox>(enemy, true);
     reg.add_component<component::damage>(enemy, component::damage(10));
     reg.add_component<component::enemy>(enemy, component::enemy());
+
+    component::path p;
+    std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(100, vector<float>(300, 0));
+    p.add_pattern(lm1);
+    std::shared_ptr<pattern_movement> lm2 = std::make_shared<linear_movement>(vector<float>(0, 100), 1);
+    p.add_pattern(lm2);
+    std::shared_ptr<pattern_movement> lm3 = std::make_shared<linear_movement>(vector<float>(100, 100), 1);
+    p.add_pattern(lm3);
+    std::shared_ptr<pattern_movement> rlm = std::make_shared<reverse_linear_movement>(vector<float>(0, -100), 1);
+    p.add_pattern(rlm);
+    reg.add_component<component::path>(enemy, std::move(p));
 
 
     while (window.isOpen()) {

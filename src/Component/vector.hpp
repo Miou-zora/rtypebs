@@ -14,9 +14,9 @@ template <typename T>
 class vector
 {
 public:
-    explicit vector(T _x, T _y) : x(_x), y(_y){};
-    explicit vector(const vector<T> &other) : x(other.x), y(other.y){};
-    explicit vector(void) : x(0), y(0) {};
+    vector(T _x, T _y) : x(_x), y(_y){};
+    vector(const vector<T> &other) : x(other.x), y(other.y){};
+    vector(void) : x(0), y(0) {};
     ~vector() = default;
 
     vector<T> operator+(const vector<T> &other) const
@@ -140,6 +140,11 @@ public:
         return (std::sqrt(std::pow(x, 2) + std::pow(y, 2)));
     }
 
+    vector<T> normalized() const
+    {
+        return (vector<T>(x / get_length(), y / get_length()));
+    }
+
     T x;
     T y;
 };
@@ -155,4 +160,34 @@ std::ostream &operator<<(std::ostream &os, const vector<T> &other)
 {
     os << "x: " << other.x << " y: " << other.y;
     return (os);
+}
+template<typename T>
+vector<T> operator/(const T &other, const vector<T> &vec)
+{
+    std::cout << vec << std::endl;
+    return (vector<T>(other / vec.get_length(), other / vec.get_length()));
+}
+
+template<typename T>
+vector<T> operator*(const T &other, const vector<T> &vec)
+{
+    return (vector<T>(other * vec.get_length(), other * vec.get_length()));
+}
+
+template<typename T>
+vector<T> operator+(const T &other, const vector<T> &vec)
+{
+    return (vector<T>(other + vec.get_length(), other + vec.get_length()));
+}
+
+template<typename T>
+vector<T> operator-(const T &other, const vector<T> &vec)
+{
+    return (vector<T>(other - vec.get_length(), other - vec.get_length()));
+}
+
+template<typename T>
+vector<T> operator-(const vector<T> &vec)
+{
+    return (vector<T>(-vec.x, -vec.y));
 }

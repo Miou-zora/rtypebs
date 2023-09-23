@@ -15,12 +15,13 @@
 
 void position_system(registry &reg,
                      sparse_array<component::position> &positions,
-                     sparse_array<component::velocity> const &velocities)
+                     sparse_array<component::velocity> &velocities)
 {
     (void)reg;
     for (auto &&[pos, vel] : zipper(positions, velocities))
     {
         pos.value().Position += vel.value().Velocity;
+        vel.value().Velocity = 0;
     }
 }
 

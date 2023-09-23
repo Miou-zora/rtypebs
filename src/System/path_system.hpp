@@ -14,14 +14,14 @@
 
 void path_system(registry &reg,
                  sparse_array<component::velocity> &velocities,
-                 sparse_array<component::path> &movements)
+                 sparse_array<component::path> &paths)
 {
-    for (auto &&[i, vel, mov] : indexed_zipper(velocities, movements)) {
-        if (mov.value().is_finished()) {
-            reg.remove_component<component::pattern_movement>(entity_t(i));
+    (void)reg;
+    for (auto &&[i, vel, path] : indexed_zipper(velocities, paths)) {
+        if (path.value().is_finished()) {
             continue;
         }
-        mov.value().update(1.f);
-        vel.value().Velocity = mov.value().get_direction();
+        path.value().update(1.f);
+        vel.value().Velocity = path.value().get_direction();
     }
 }
