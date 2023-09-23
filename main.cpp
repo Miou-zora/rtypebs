@@ -14,6 +14,7 @@
 #include "collide_system.hpp"
 #include "drawable.hpp"
 #include "damage_system.hpp"
+#include "path.hpp"
 
 int main(int ac, char **av)
 {

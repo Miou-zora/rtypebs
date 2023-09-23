@@ -11,7 +11,7 @@ namespace component
 {
     struct damage
     {
-        damage(int _damage) : Damage(_damage) {}
-        int Damage;
+        damage(int _value) : value(_value){};
+        int value;
     };
 }

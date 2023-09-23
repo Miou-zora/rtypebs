@@ -27,7 +27,7 @@ void draw_system(registry &reg,
         if (sprite.value().Drawable == nullptr)
             continue;
         sf::Transform transform;
-        transform.translate(pos.value().x, pos.value().y);
+        transform.translate(pos.value().Position.x, pos.value().Position.y);
 
         window.draw(*sprite.value().Drawable, transform);
     }

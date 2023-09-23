@@ -26,7 +26,7 @@ void hurtbox_display_system(registry &reg,
         hurtbox.setOutlineColor(hb.value().collided_with.empty() ? sf::Color::Green : sf::Color::Red);
         hurtbox.setOutlineThickness(1);
         sf::Transform transform;
-        transform.translate(pos.value().x, pos.value().y);
+        transform.translate(pos.value().Position.x, pos.value().Position.y);
         window.draw(hurtbox, transform);
     }
 }

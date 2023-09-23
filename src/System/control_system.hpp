@@ -20,8 +20,8 @@ void control_system(registry &reg,
     (void)reg;
     for (auto &&[cont, vel] : zipper(controllables, velocities))
     {
-        vel.value().vx = (cont.value().is_key_right_pressed() - cont.value().is_key_left_pressed());
-        vel.value().vy = (cont.value().is_key_down_pressed() - cont.value().is_key_up_pressed());
+        vel.value().Velocity.x = (cont.value().is_key_right_pressed() - cont.value().is_key_left_pressed());
+        vel.value().Velocity.y = (cont.value().is_key_down_pressed() - cont.value().is_key_up_pressed());
     }
 }
 

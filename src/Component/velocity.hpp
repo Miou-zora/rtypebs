@@ -5,16 +5,16 @@
 ** velocity
 */
 
-#ifndef VELOCITY_HPP_
-#define VELOCITY_HPP_
+#pragma once
+
+#include "vector.hpp"
 
 namespace component
 {
     struct velocity {
-        velocity(float _vx, float _vy) : vx(_vx), vy(_vy) {};
-        float vx;
-        float vy;
+        velocity(float x, float y) : Velocity(x, y) {};
+        velocity(const vector<float> &pos) : Velocity(pos) {};
+        velocity() : Velocity(0, 0) {};
+        vector<float> Velocity;
     };
 };
-
-#endif /* !VELOCITY_HPP_ */

@@ -5,16 +5,16 @@
 ** position
 */
 
-#ifndef POSITION_HPP_
-#define POSITION_HPP_
+#pragma once
+
+#include "vector.hpp"
 
 namespace component
 {
     struct position {
-        position(float _x, float _y) : x(_x), y(_y) {};
-        float x;
-        float y;
+        position(float x, float y) : Position(x, y) {};
+        position(const vector<float> &pos) : Position(pos) {};
+        position() : Position(0, 0) {};
+        vector<float> Position;
     };
 };
-
-#endif /* !POSITION_HPP_ */

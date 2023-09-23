@@ -11,7 +11,7 @@ namespace component
 {
     struct health
     {
-        health(int _health) : Health(_health) {}
-        int Health;
+        health(int _value) : value(_value){};
+        int value;
     };
 }

@@ -18,7 +18,5 @@ void logging_system(registry &r,
 {
     (void)r;
     for (auto &&[i, pos, vel] : indexed_zipper(positions, velocities))
-        std::cerr << i << ": Position = { " << pos.value().x << ", " << pos.value().y
-                   << " } , Velocity = { " << vel.value().vx << ", " << vel.value().vy << "}"
-                   << std :: endl ;
+        std::cerr << i << ": Position = " << pos.value().Position << ", Velocity = " << vel.value().Velocity << std ::endl;
 }

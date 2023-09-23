@@ -23,10 +23,10 @@ void collide_system(registry &reg,
         {
             if (index_first == index_second)
                 continue;
-            if (pos_first.value().x < pos_second.value().x + hb_second.value().width &&
-                pos_first.value().x + hb_first.value().width > pos_second.value().x &&
-                pos_first.value().y < pos_second.value().y + hb_second.value().height &&
-                pos_first.value().y + hb_first.value().height > pos_second.value().y)
+            if (pos_first.value().Position.x < pos_second.value().Position.x + hb_second.value().width &&
+                pos_first.value().Position.x + hb_first.value().width > pos_second.value().Position.x &&
+                pos_first.value().Position.y < pos_second.value().Position.y + hb_second.value().height &&
+                pos_first.value().Position.y + hb_first.value().height > pos_second.value().Position.y)
             {
                 hb_first.value().collided_with.push_back(reg.entity_from_index(index_second));
             }

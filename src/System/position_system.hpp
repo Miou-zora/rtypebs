@@ -20,8 +20,7 @@ void position_system(registry &reg,
     (void)reg;
     for (auto &&[pos, vel] : zipper(positions, velocities))
     {
-        pos.value().x = (pos.value().x + vel.value().vx);
-        pos.value().y = (pos.value().y + vel.value().vy);
+        pos.value().Position += vel.value().Velocity;
     }
 }
 

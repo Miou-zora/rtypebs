@@ -38,7 +38,7 @@ void damage_system(registry &reg,
                 )
             )
             {
-                health.value().Health -= reg.get_components<component::damage>()[collide_with].value().Damage;
+                health.value().value -= reg.get_components<component::damage>()[collide_with].value().value;
             }
         }
     }
