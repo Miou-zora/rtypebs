@@ -38,6 +38,8 @@ int main(int ac, char **av)
     reg.register_component<component::displayable_hurtbox>();
     reg.register_component<component::health>();
     reg.register_component<component::damage>();
+    reg.register_component<component::enemy>();
+    reg.register_component<component::player>();
 
     entity_t player = reg.spawn_entity();
     reg.emplace_component<component::position>(player, 50, 50);
@@ -52,6 +54,7 @@ int main(int ac, char **av)
     controllable.is_key_right_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)); };
     reg.add_component<component::controllable>(player, std::move(controllable));
     reg.add_component<component::health>(player, 100);
+    reg.add_component<component::player>(player, component::player());
 
     entity_t enemy = reg.spawn_entity();
     reg.emplace_component<component::position>(enemy, 200, 200);
@@ -60,6 +63,7 @@ int main(int ac, char **av)
     reg.emplace_component<component::collider>(enemy, 60, 60);
     reg.emplace_component<component::displayable_hurtbox>(enemy, true);
     reg.add_component<component::damage>(enemy, component::damage(10));
+    reg.add_component<component::enemy>(enemy, component::enemy());
 
 
     while (window.isOpen()) {

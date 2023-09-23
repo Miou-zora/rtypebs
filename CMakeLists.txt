@@ -10,6 +10,7 @@ set(INCLUDE
     "src/"
     "src/Component/"
     "src/System/"
+    "src/Component/Tag/"
 )
 
 include_directories(${INCLUDE})
