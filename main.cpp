@@ -104,13 +104,7 @@ int main(int ac, char **av)
     p2.add_pattern(ilm);
     reg.add_component<component::path>(projectile, std::move(p2));
 
-    prefab<
-        component::position,
-        component::velocity,
-        component::drawable,
-        component::collider,
-        component::displayable_hurtbox
-    > square_prefab;
+    prefab square_prefab;
     square_prefab.add_component<component::position>(100, 100);
     square_prefab.add_component<component::velocity>(0, 0);
     square_prefab.add_component<component::drawable>(enemy_sprite);

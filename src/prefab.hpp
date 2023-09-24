@@ -12,22 +12,19 @@
 #include <vector>
 #include <typeindex>
 #include "registry.hpp"
-#include "displayable_hurtbox.hpp"
 
-template <class... Components>
 class prefab
 {
     public:
-        prefab()
-        {
-            (add_component<Components>(), ...);
-        }
+        prefab() = default;
         virtual ~prefab() = default;
 
         template <class Component, typename... Args>
         prefab &add_component(Args... args)
         {
-            _components[std::type_index(typeid(Component))] = (std::make_any<Component>(args...));
+            _components[std::type_index(typeid(Component))] = ([args...](registry &reg, const entity_t &entity) -> void {
+                reg.add_component<Component>(entity, Component(args...));
+            });
             return (*this);
         }
 
@@ -35,11 +32,13 @@ class prefab
         {
             entity_t entity = reg.spawn_entity();
 
-            (reg.add_component<Components>(entity, std::any_cast<Components>(_components[std::type_index(typeid(Components))])), ...);
+            for (auto &component : _components) {
+                component.second(reg, entity);
+            }
             return (entity);
         }
 
     private:
-        std::unordered_map<std::type_index, std::any> _components;
+        std::unordered_map<std::type_index, std::function<void(registry &, const entity_t &)>> _components;
 
 };
