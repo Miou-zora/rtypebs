@@ -12,6 +12,7 @@
 #include <vector>
 #include <typeindex>
 #include "registry.hpp"
+#include "displayable_hurtbox.hpp"
 
 template <class... Components>
 class prefab

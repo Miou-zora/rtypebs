@@ -14,7 +14,7 @@ namespace component
 {
     struct collider
     {
-        collider(int _width, int _height) : width(_width), height(_height) {};
+        collider(int _width = 0, int _height = 0) : width(_width), height(_height) {};
         int width;
         int height;
         std::vector<entity_t> collided_with;

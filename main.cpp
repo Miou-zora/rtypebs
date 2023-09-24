@@ -59,7 +59,7 @@ int main(int ac, char **av)
     player_sprite->setScale(0.1, 0.1);
     reg.emplace_component<component::drawable>(player, player_sprite);
     reg.emplace_component<component::collider>(player, player_sprite->getGlobalBounds().width, player_sprite->getGlobalBounds().height);
-    reg.emplace_component<component::displayable_hurtbox>(player, true);
+    reg.emplace_component<component::displayable_hurtbox>(player, component::displayable_hurtbox(true));
     component::controllable controllable;
     controllable.is_key_up_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)); };
     controllable.is_key_down_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)); };
@@ -77,7 +77,7 @@ int main(int ac, char **av)
     enemy_sprite->setScale(0.5, 0.5);
     reg.emplace_component<component::drawable>(enemy, enemy_sprite);
     reg.emplace_component<component::collider>(enemy, enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height);
-    reg.emplace_component<component::displayable_hurtbox>(enemy, true);
+    reg.emplace_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
     std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(100, vector<float>(300, 0));
@@ -95,7 +95,7 @@ int main(int ac, char **av)
     reg.emplace_component<component::velocity>(projectile, 0, 0);
     reg.emplace_component<component::drawable>(projectile, std::make_shared<sf::RectangleShape>(sf::Vector2f(10, 5)));
     reg.emplace_component<component::collider>(projectile, 10, 5);
-    reg.emplace_component<component::displayable_hurtbox>(projectile, true);
+    reg.emplace_component<component::displayable_hurtbox>(projectile, component::displayable_hurtbox(true));
     reg.add_component<component::damage>(projectile, component::damage(10));
     reg.add_component<component::enemy>(projectile, component::enemy());
     reg.add_component<component::projectile>(projectile, component::projectile());
@@ -104,10 +104,19 @@ int main(int ac, char **av)
     p2.add_pattern(ilm);
     reg.add_component<component::path>(projectile, std::move(p2));
 
-    prefab<component::position, component::velocity, component::drawable> square_prefab;
+    prefab<
+        component::position,
+        component::velocity,
+        component::drawable,
+        component::collider,
+        component::displayable_hurtbox
+    > square_prefab;
     square_prefab.add_component<component::position>(100, 100);
     square_prefab.add_component<component::velocity>(0, 0);
-    square_prefab.add_component<component::drawable>(std::make_shared<sf::RectangleShape>(sf::Vector2f(100, 100)));
+    square_prefab.add_component<component::drawable>(enemy_sprite);
+    square_prefab.add_component<component::collider>(enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height);
+    square_prefab.add_component<component::displayable_hurtbox>(true);
+
 
     entity_t square =  square_prefab.instantiate(reg);
     reg.get_components<component::position>()[square].value().Position.x = 500;

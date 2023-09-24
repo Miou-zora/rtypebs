@@ -10,7 +10,7 @@
 #include "registry.hpp"
 #include "collider.hpp"
 #include "displayable_hurtbox.hpp"
-#include "zipper.hpp"
+#include "indexed_zipper.hpp"
 #include "draw_system.hpp"
 
 void hurtbox_display_system(registry &reg,
@@ -19,8 +19,10 @@ void hurtbox_display_system(registry &reg,
                     sparse_array<component::position> const &positions)
 {
     (void)reg;
-    for (auto &&[hb, displayable_hb, pos] : zipper(colliders, displayable_hurtboxes, positions))
+    for (auto &&[i, hb, displayable_hb, pos] : indexed_zipper(colliders, displayable_hurtboxes, positions))
     {
+        if (!displayable_hb.value().is_displayed)
+            continue;
         sf::RectangleShape hurtbox(sf::Vector2f(hb.value().width, hb.value().height));
         hurtbox.setFillColor(sf::Color::Transparent);
         hurtbox.setOutlineColor(hb.value().collided_with.empty() ? sf::Color::Green : sf::Color::Red);

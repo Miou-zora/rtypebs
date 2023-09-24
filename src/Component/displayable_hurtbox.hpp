@@ -9,5 +9,10 @@
 
 namespace component
 {
-    typedef bool displayable_hurtbox;
+    struct displayable_hurtbox {
+        displayable_hurtbox(bool _is_displayed = false) : is_displayed(_is_displayed) {};
+        ~displayable_hurtbox() = default;
+
+        bool is_displayed;
+    };
 };
