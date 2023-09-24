@@ -8,15 +8,17 @@
 #ifndef DRAWABLE_HPP_
 #define DRAWABLE_HPP_
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
+#include <memory>
+#include <raylib.h>
+#include "vector.hpp"
 
 namespace component
 {
     struct drawable
     {
-        drawable(std::shared_ptr<sf::Drawable> _drawable = nullptr) : Drawable(_drawable) {}
-        std::shared_ptr<sf::Drawable> Drawable;
+        drawable(Texture2D _drawable, float _scale = 1) : Drawable(_drawable), scale(_scale) {}
+        Texture2D Drawable;
+        float scale;
     };
 };
 

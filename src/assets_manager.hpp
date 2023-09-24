@@ -10,20 +10,22 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <unordered_map>
+#include "raylib.h"
 
 class assets_manager
 {
     public:
-        using texture_t = sf::Texture;
-        using sound_t = sf::SoundBuffer;
-        using font_t = sf::Font;
+        using texture_t = Texture2D;
+        using sound_t = Sound;
+        using font_t = Font;
     public:
         assets_manager() = default;
         virtual ~assets_manager() = default;
 
         bool load_texture(const std::string &name, const std::string &path)
         {
-            bool result = _textures[name].loadFromFile(path);
+            _textures[name] = LoadTexture(path.c_str());
+            bool result = _textures[name].id != 0;
             if (result) {
                 std::cout << "Loaded texture " << name << " from " << path << std::endl;
             } else {
@@ -39,7 +41,8 @@ class assets_manager
 
         bool load_sound(const std::string &name, const std::string &path)
         {
-            bool result = _sounds[name].loadFromFile(path);
+            _sounds[name] = LoadSound(path.c_str());
+            bool result = _sounds[name].frameCount != 0;
             if (result) {
                 std::cout << "Loaded sound " << name << " from " << path << std::endl;
             } else {
@@ -55,7 +58,8 @@ class assets_manager
 
         bool load_font(const std::string &name, const std::string &path)
         {
-            bool result = _fonts[name].loadFromFile(path);
+            _fonts[name] = LoadFont(path.c_str());
+            bool result = _fonts[name].baseSize != 0;
             if (result) {
                 std::cout << "Loaded font " << name << " from " << path << std::endl;
             } else {

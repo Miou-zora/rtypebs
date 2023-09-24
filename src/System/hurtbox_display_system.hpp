@@ -23,12 +23,10 @@ void hurtbox_display_system(registry &reg,
     {
         if (!displayable_hb.value().is_displayed)
             continue;
-        sf::RectangleShape hurtbox(sf::Vector2f(hb.value().width, hb.value().height));
-        hurtbox.setFillColor(sf::Color::Transparent);
-        hurtbox.setOutlineColor(hb.value().collided_with.empty() ? sf::Color::Green : sf::Color::Red);
-        hurtbox.setOutlineThickness(1);
-        sf::Transform transform;
-        transform.translate(pos.value().Position.x, pos.value().Position.y);
-        window.draw(hurtbox, transform);
+        DrawRectangleLines(pos.value().Position.x,
+        pos.value().Position.y,
+        hb.value().width,
+        hb.value().height,
+        hb.value().collided_with.empty() ? GREEN : RED);
     }
 }

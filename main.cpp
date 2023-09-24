@@ -18,11 +18,18 @@
 #include "projectile_system.hpp"
 #include "shoot_system.hpp"
 #include "prefab.hpp"
+#include <iostream>
+#include "raylib.h"
 
 int main(int ac, char **av)
 {
     (void)ac;
     (void)av;
+
+    int screenWidth = 1300;
+    int screenHeight = 800;
+
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
     registry reg;
 
@@ -58,25 +65,22 @@ int main(int ac, char **av)
 
     reg.emplace_component<component::position>(player, 50, 50);
     reg.emplace_component<component::velocity>(player, 0, 0);
-    std::shared_ptr<sf::Sprite> player_sprite = std::make_shared<sf::Sprite>();
-    player_sprite->setTexture(reg.get_assets_manager().get_texture("player"));
-    player_sprite->setScale(0.1, 0.1);
-    reg.emplace_component<component::drawable>(player, player_sprite);
-    reg.emplace_component<component::collider>(player, player_sprite->getGlobalBounds().width, player_sprite->getGlobalBounds().height);
     reg.emplace_component<component::displayable_hurtbox>(player, component::displayable_hurtbox(true));
-    component::controllable controllable;
-    controllable.is_key_up_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)); };
-    controllable.is_key_down_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)); };
-    controllable.is_key_left_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)); };
-    controllable.is_key_right_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)); };
-    reg.add_component<component::controllable>(player, std::move(controllable));
     reg.add_component<component::health>(player, 100);
     reg.add_component<component::player>(player, component::player());
+    component::drawable player_sprite = component::drawable(reg.get_assets_manager().get_texture("player"), 0.1);
+    reg.add_component<component::collider>(player, component::collider(player_sprite.Drawable.width * player_sprite.scale, player_sprite.Drawable.height * player_sprite.scale));
+    component::controllable player_control;
+    player_control.is_key_up_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_W)); });
+    player_control.is_key_down_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_S)); });
+    player_control.is_key_left_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_A)); });
+    player_control.is_key_right_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_D)); });
+    reg.add_component<component::controllable>(player, std::move(player_control));
+    reg.add_component<component::drawable>(player, std::move(player_sprite));
 
     prefab proj_enemy_prefab;
     proj_enemy_prefab.add_component<component::position>(0, 0);
     proj_enemy_prefab.add_component<component::velocity>(0, 0);
-    proj_enemy_prefab.add_component<component::drawable>(std::make_shared<sf::RectangleShape>(sf::Vector2f(10, 5)));
     proj_enemy_prefab.add_component<component::collider>(10, 5);
     proj_enemy_prefab.add_component<component::displayable_hurtbox>(true);
     proj_enemy_prefab.add_component<component::damage>(10);
@@ -90,11 +94,6 @@ int main(int ac, char **av)
     entity_t enemy = reg.spawn_entity();
     reg.emplace_component<component::position>(enemy, 200, 200);
     reg.emplace_component<component::velocity>(enemy, 0, 0);
-    std::shared_ptr<sf::Sprite> enemy_sprite = std::make_shared<sf::Sprite>();
-    enemy_sprite->setTexture(reg.get_assets_manager().get_texture("enemy"));
-    enemy_sprite->setScale(0.5, 0.5);
-    reg.emplace_component<component::drawable>(enemy, enemy_sprite);
-    reg.emplace_component<component::collider>(enemy, enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height);
     reg.emplace_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
@@ -108,12 +107,14 @@ int main(int ac, char **av)
     p.add_pattern(rlm);
     reg.add_component<component::path>(enemy, std::move(p));
     reg.add_component<component::shooter>(enemy, component::shooter(std::move(proj_enemy_prefab), 200));
+    component::drawable enemy_sprite = component::drawable(reg.get_assets_manager().get_texture("enemy"), 0.5);
+    reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
+    reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
 
     entity_t projectile = reg.spawn_entity();
     reg.emplace_component<component::position>(projectile, 1000, 200);
     reg.emplace_component<component::velocity>(projectile, 0, 0);
-    reg.emplace_component<component::drawable>(projectile, std::make_shared<sf::RectangleShape>(sf::Vector2f(10, 5)));
-    reg.emplace_component<component::collider>(projectile, 10, 5);
+    reg.add_component<component::collider>(projectile, component::collider(10, 5));
     reg.emplace_component<component::displayable_hurtbox>(projectile, component::displayable_hurtbox(true));
     reg.add_component<component::damage>(projectile, component::damage(10));
     reg.add_component<component::enemy>(projectile, component::enemy());
@@ -126,30 +127,30 @@ int main(int ac, char **av)
     prefab square_prefab;
     square_prefab.add_component<component::position>(100, 100);
     square_prefab.add_component<component::velocity>(0, 0);
-    square_prefab.add_component<component::drawable>(enemy_sprite);
-    square_prefab.add_component<component::collider>(enemy_sprite->getGlobalBounds().width, enemy_sprite->getGlobalBounds().height);
     square_prefab.add_component<component::displayable_hurtbox>(true);
+    component::drawable enemy_sprite2 = component::drawable(reg.get_assets_manager().get_texture("enemy"), 0.4);
+    square_prefab.add_component<component::collider>(component::collider(enemy_sprite2.Drawable.width * enemy_sprite2.scale, enemy_sprite2.Drawable.height * enemy_sprite2.scale));
+    square_prefab.add_component<component::drawable>(std::move(enemy_sprite2));
 
-
-    entity_t square =  square_prefab.instantiate(reg);
+    entity_t square = square_prefab.instantiate(reg);
     reg.get_components<component::position>()[square].value().Position.x = 500;
     reg.get_components<component::position>()[square].value().Position.y = 500;
 
     square_prefab.instantiate(reg);
 
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) window.close();
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) window.close();
-        }
+    SetTargetFPS(60);
 
-        window.clear(sf::Color::Black);
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+
+        ClearBackground(BLACK);
 
         reg.run_systems();
 
-        window.display();
+        EndDrawing();
     }
 
+    CloseWindow();
     return (0);
 }

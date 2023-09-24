@@ -11,11 +11,13 @@
 #include "registry.hpp"
 #include "drawable.hpp"
 #include "position.hpp"
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
 #include "zipper.hpp"
+#include "raylib.h"
 
-sf::RenderWindow window(sf::VideoMode(1920, 1080), "B-SRType");
+Vector2 vector_to_raylib(vector<float> const &vec)
+{
+    return (Vector2){vec.x, vec.y};
+}
 
 void draw_system(registry &reg,
     sparse_array<component::position> const &positions,
@@ -24,12 +26,7 @@ void draw_system(registry &reg,
     (void)reg;
     for (auto &&[pos, sprite] : zipper(positions, sprites))
     {
-        if (sprite.value().Drawable == nullptr)
-            continue;
-        sf::Transform transform;
-        transform.translate(pos.value().Position.x, pos.value().Position.y);
-
-        window.draw(*sprite.value().Drawable, transform);
+        DrawTextureEx(sprite.value().Drawable, vector_to_raylib(pos.value().Position), 0, sprite.value().scale, WHITE);
     }
 }
 
