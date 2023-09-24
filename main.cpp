@@ -16,6 +16,7 @@
 #include "damage_system.hpp"
 #include "path_system.hpp"
 #include "projectile_system.hpp"
+#include "shoot_system.hpp"
 #include "prefab.hpp"
 
 int main(int ac, char **av)
@@ -32,6 +33,7 @@ int main(int ac, char **av)
     reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
     reg.add_system<component::collider, component::projectile>(projectile_system);
     reg.add_system<component::velocity, component::path>(path_system);
+    reg.add_system<component::shooter>(shoot_system);
     reg.add_system<component::position, component::velocity>(position_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
@@ -47,11 +49,13 @@ int main(int ac, char **av)
     reg.register_component<component::player>();
     reg.register_component<component::projectile>();
     reg.register_component<component::path>();
+    reg.register_component<component::shooter>();
 
     reg.get_assets_manager().load_texture("player", "assets/player.png");
     reg.get_assets_manager().load_texture("enemy", "assets/enemy.png");
 
     entity_t player = reg.spawn_entity();
+
     reg.emplace_component<component::position>(player, 50, 50);
     reg.emplace_component<component::velocity>(player, 0, 0);
     std::shared_ptr<sf::Sprite> player_sprite = std::make_shared<sf::Sprite>();
@@ -68,6 +72,20 @@ int main(int ac, char **av)
     reg.add_component<component::controllable>(player, std::move(controllable));
     reg.add_component<component::health>(player, 100);
     reg.add_component<component::player>(player, component::player());
+
+    prefab proj_enemy_prefab;
+    proj_enemy_prefab.add_component<component::position>(0, 0);
+    proj_enemy_prefab.add_component<component::velocity>(0, 0);
+    proj_enemy_prefab.add_component<component::drawable>(std::make_shared<sf::RectangleShape>(sf::Vector2f(10, 5)));
+    proj_enemy_prefab.add_component<component::collider>(10, 5);
+    proj_enemy_prefab.add_component<component::displayable_hurtbox>(true);
+    proj_enemy_prefab.add_component<component::damage>(10);
+    proj_enemy_prefab.add_component<component::enemy>(component::enemy());
+    proj_enemy_prefab.add_component<component::projectile>(component::projectile());
+    component::path p3;
+    std::shared_ptr<pattern_movement> ilm2 = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 1);
+    p3.add_pattern(ilm2);
+    proj_enemy_prefab.add_component<component::path>(std::move(p3));
 
     entity_t enemy = reg.spawn_entity();
     reg.emplace_component<component::position>(enemy, 200, 200);
@@ -89,6 +107,7 @@ int main(int ac, char **av)
     std::shared_ptr<pattern_movement> rlm = std::make_shared<reverse_linear_movement>(vector<float>(0, -100), 1);
     p.add_pattern(rlm);
     reg.add_component<component::path>(enemy, std::move(p));
+    reg.add_component<component::shooter>(enemy, component::shooter(std::move(proj_enemy_prefab), 200));
 
     entity_t projectile = reg.spawn_entity();
     reg.emplace_component<component::position>(projectile, 1000, 200);
@@ -115,12 +134,6 @@ int main(int ac, char **av)
     entity_t square =  square_prefab.instantiate(reg);
     reg.get_components<component::position>()[square].value().Position.x = 500;
     reg.get_components<component::position>()[square].value().Position.y = 500;
-    component::controllable controllable2;
-    controllable2.is_key_up_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)); };
-    controllable2.is_key_down_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)); };
-    controllable2.is_key_left_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)); };
-    controllable2.is_key_right_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)); };
-    reg.add_component<component::controllable>(square,std::move(controllable2));
 
     square_prefab.instantiate(reg);
 

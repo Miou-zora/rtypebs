@@ -17,12 +17,14 @@ void projectile_system(registry &reg,
                     sparse_array<component::projectile> const &projectiles)
 {
     (void)reg;
-    for (auto &&[index, collider, projectile] : indexed_zipper(colliders, projectiles))
-    {
-        if (!collider.value().collided_with.empty())
-        {
-            reg.kill_entity(reg.entity_from_index(index));
-        }
-    }
+    (void)colliders;
+    (void)projectiles;
+    // for (auto &&[index, collider, projectile] : indexed_zipper(colliders, projectiles))
+    // {
+    //     if (!collider.value().collided_with.empty())
+    //     {
+    //         reg.kill_entity(reg.entity_from_index(index));
+    //     }
+    // }
 
 }
