@@ -15,7 +15,7 @@ namespace component
 {
     struct drawable
     {
-        drawable(std::shared_ptr<sf::Drawable> _drawable) : Drawable(_drawable) {}
+        drawable(std::shared_ptr<sf::Drawable> _drawable = nullptr) : Drawable(_drawable) {}
         std::shared_ptr<sf::Drawable> Drawable;
     };
 };

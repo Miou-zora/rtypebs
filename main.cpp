@@ -16,6 +16,7 @@
 #include "damage_system.hpp"
 #include "path_system.hpp"
 #include "projectile_system.hpp"
+#include "prefab.hpp"
 
 int main(int ac, char **av)
 {
@@ -103,8 +104,22 @@ int main(int ac, char **av)
     p2.add_pattern(ilm);
     reg.add_component<component::path>(projectile, std::move(p2));
 
+    prefab<component::position, component::velocity, component::drawable> square_prefab;
+    square_prefab.add_component<component::position>(100, 100);
+    square_prefab.add_component<component::velocity>(0, 0);
+    square_prefab.add_component<component::drawable>(std::make_shared<sf::RectangleShape>(sf::Vector2f(100, 100)));
 
+    entity_t square =  square_prefab.instantiate(reg);
+    reg.get_components<component::position>()[square].value().Position.x = 500;
+    reg.get_components<component::position>()[square].value().Position.y = 500;
+    component::controllable controllable2;
+    controllable2.is_key_up_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)); };
+    controllable2.is_key_down_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)); };
+    controllable2.is_key_left_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)); };
+    controllable2.is_key_right_pressed = []() -> bool { return (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)); };
+    reg.add_component<component::controllable>(square,std::move(controllable2));
 
+    square_prefab.instantiate(reg);
 
     while (window.isOpen()) {
         sf::Event event;

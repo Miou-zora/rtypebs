@@ -32,7 +32,6 @@ public:
     template <class Component>
     sparse_array<Component> &register_component()
     {
-        std::cout << std::type_index(typeid(Component)).hash_code() << std::endl;
         _components[std::type_index(typeid(Component))] = component_t{
             sparse_array<Component>(),
             [](registry &reg, entity_t const &entity)
