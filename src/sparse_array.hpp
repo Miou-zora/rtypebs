@@ -13,7 +13,7 @@
 #include <iostream>
 #include <optional>
 
-template <typename Component, class Allocator = std::allocator<std::optional<Component>>>
+template <typename Component, typename Allocator = std::allocator<std::optional<Component>>>
 class sparse_array
 {
 public:
@@ -95,28 +95,26 @@ public:
         return (_data.size());
     }
 
-    reference_type insert_at(size_type pos, Component const &other) // TODO: use allocator traits
+    reference_type insert_at(size_type pos, Component const &other)
     {
+        auto allocator = _data.get_allocator();
+
         if (_data.size() <= pos) {
             _data.resize(pos + 1);
-        } else {
-            if (_data[pos].has_value()) {
-                _data[pos].reset();
-            }
         }
+        std::allocator_traits<decltype(allocator)>::destroy(allocator, std::addressof(_data[pos]));
         _data[pos] = other;
         return (_data[pos]);
     }
 
     reference_type insert_at(size_type pos, Component &&other) // TODO: use allocator traits
     {
+        auto allocator = _data.get_allocator();
+
         if (_data.size() <= pos) {
             _data.resize(pos + 1);
-        } else {
-            if (_data[pos].has_value()) {
-                _data[pos].reset();
-            }
         }
+        std::allocator_traits<decltype(allocator)>::destroy(allocator, std::addressof(_data[pos]));
         _data[pos] = std::move(other);
         return (_data[pos]);
     }
@@ -124,15 +122,23 @@ public:
     template <class... Params>
     reference_type emplace_at(size_type pos, Params &&...other) // TODO: Axel, check this
     {
-        _data.emplace(_data.begin() + pos, std::forward<Params>(other)...);
+        auto allocator = _data.get_allocator();
+
+        if (_data.size() <= pos) {
+            _data.resize(pos + 1);
+        }
+        std::allocator_traits<decltype(allocator)>::destroy(allocator, std::addressof(_data[pos]));
+        std::allocator_traits<decltype(allocator)>::construct(allocator, std::addressof(_data[pos]), std::forward<Params>(other)...);
         return (_data[pos]);
     }
 
     void erase(size_type pos) // TODO: use allocator traits
     {
         if (_data.size() <= pos)
-            return;
-        _data[pos].reset();
+            return; // TODO: throw exception
+        auto allocator = _data.get_allocator();
+        std::allocator_traits<decltype(allocator)>::destroy(allocator, std::addressof(_data[pos]));
+        _data[pos] = std::nullopt;
     }
 
     size_type get_index(value_type const &other) const
