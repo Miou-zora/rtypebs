@@ -35,7 +35,10 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
   endif()
 endif()
 
-
 add_executable(untitled ${MAIN} ${SRC})
+enable_testing()
+add_executable(test_rtype_server tests/test_A.cpp)
+target_link_libraries(test_rtype_server gtest gtest_main)
+add_test(NAME r-type_server_test COMMAND test_rtype_server)
 target_link_libraries(untitled raylib)
 
