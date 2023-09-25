@@ -17,10 +17,10 @@ void shoot_system(registry &reg,
     (void)reg; // TODO: add delta time
     for (auto &&[index, shooter] : indexed_zipper(shooters))
     {
-        shooter.value().timer += 1;
+        shooter.value().timer += reg.get_delta_time();
         if (shooter.value().timer >= shooter.value().cooldown)
         {
-            shooter.value().timer = 0;
+            shooter.value().timer -= shooter.value().cooldown;
             entity_t proj = shooter.value().projectile.instantiate(reg);
             if (reg.get_components<component::position>()[index].has_value() &&
                 reg.get_components<component::position>()[proj].has_value())

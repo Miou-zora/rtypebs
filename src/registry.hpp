@@ -15,6 +15,7 @@
 #include <typeindex>
 #include <any>
 #include <functional>
+#include <chrono>
 
 class registry
 {
@@ -142,11 +143,26 @@ public:
         return (_assets_manager);
     }
 
+    float get_delta_time() const
+    {
+        return (_delta_time);
+    }
+
+    void update_delta_time()
+    {
+        static std::chrono::time_point<std::chrono::system_clock> last = std::chrono::system_clock::now();
+        std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+        std::chrono::duration<float> elapsed_seconds = now - last;
+        _delta_time = elapsed_seconds.count();
+        last = now;
+    }
+
 private:
     std::unordered_map<std::type_index, component_t> _components;
     std::vector<std::function<void(registry &)>> _systems;
     std::vector<entity_t> _dead_entities;
     assets_manager _assets_manager;
+    float _delta_time;
 };
 
 #endif /* !REGISTRY_HPP_ */

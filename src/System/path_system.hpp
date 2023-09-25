@@ -23,7 +23,7 @@ void path_system(registry &reg,
         {
             continue;
         }
-        path.value().update(1.f);
-        vel.value().Velocity = path.value().get_direction();
+        path.value().update(reg.get_delta_time());
+        vel.value().Velocity = path.value().get_last_direction();
     }
 }

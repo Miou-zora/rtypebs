@@ -19,7 +19,7 @@ public:
     pattern_movement(){};
     virtual ~pattern_movement(){};
 
-    virtual vector<float> get_direction() = 0;
+    virtual vector<float> get_last_direction() = 0;
     virtual void update(float dt) = 0;
     virtual void reset() = 0;
     virtual bool is_finished() = 0;
@@ -32,22 +32,27 @@ public:
 
     linear_movement(float time, vector<float> target) : _target(target), _direction(target / time), _actual_position(0, 0){};
 
-    vector<float> get_direction() override
+    vector<float> get_last_direction() override
     {
-        return (vector<float>(_direction));
+        return (_last_direction);
     }
+
     void update(float dt) override
     {
-        if (_actual_position >= _target)
-            return;
-        if (_actual_position + _direction * dt >= _target)
+        if (_actual_position >= _target) {
+            _last_direction = vector<float>(0, 0);
+        } if (_actual_position + _direction * dt >= _target) {
             _actual_position = _target;
-        else
+            _last_direction = _target - _actual_position;
+        } else {
             _actual_position += _direction * dt;
+            _last_direction = _direction * dt;
+        }
     }
     void reset() override
     {
         _actual_position = 0;
+        _last_direction = vector<float>(0, 0);
     }
     bool is_finished() override
     {
@@ -58,6 +63,7 @@ protected:
     vector<float> _target;
     vector<float> _direction;
     vector<float> _actual_position;
+    vector<float> _last_direction;
 };
 
 class infinite_linear_movement : virtual public linear_movement
@@ -68,6 +74,7 @@ public:
     void update(float dt) override
     {
         _actual_position += _direction * dt;
+        _last_direction = _direction * dt;
     }
 
     bool is_finished() override
@@ -76,49 +83,58 @@ public:
     }
 };
 
-class reverse_linear_movement : virtual public pattern_movement
+class reverse_linear_movement : virtual public linear_movement
 {
 public:
-    reverse_linear_movement(vector<float> target, float speed = 1) : _target(target), _direction(target.normalized() * speed), _actual_position(0, 0){};
-    reverse_linear_movement(float time, vector<float> target) : _target(target), _direction(target / time), _actual_position(0, 0){};
+    reverse_linear_movement(vector<float> target, float speed = 1) : linear_movement(target, speed) {};
+    reverse_linear_movement(float time, vector<float> target) : linear_movement(time, target) {};
 
-    vector<float> get_direction() override
+    vector<float> get_last_direction() override
     {
-        return (vector<float>(_direction));
+        return (_last_direction);
     }
+
     void update(float dt) override
     {
         if (!reverse)
         {
-            if (_actual_position >= _target)
-                return;
-            if (_actual_position + _direction * dt >= _target)
+            if (_actual_position >= _target) {
+                _last_direction = vector<float>(0, 0);
+            } if (_actual_position + _direction * dt >= _target)
             {
                 _actual_position = _target;
                 reverse = !reverse;
                 _direction = -_direction;
+                _last_direction = _target - _actual_position;
             }
-            else
+            else {
                 _actual_position += _direction * dt;
+                _last_direction = _direction * dt;
+            }
         }
         else
         {
-            if (_actual_position.x && _actual_position.y == 0)
-                return;
+            if (_actual_position.x && _actual_position.y == 0) {
+                _last_direction = vector<float>(0, 0);
+            }
             if (std::signbit((_actual_position + _direction * dt).x) != std::signbit(_actual_position.x) ||
                 std::signbit((_actual_position + _direction * dt).y) != std::signbit(_actual_position.y))
             {
                 _actual_position = 0;
                 reverse = !reverse;
                 _direction = -_direction;
+                _last_direction = _direction * dt;
             }
-            else
+            else {
                 _actual_position += _direction * dt;
+                _last_direction = _direction * dt;
+            }
         }
     }
     void reset() override
     {
         _actual_position = 0;
+        _last_direction = vector<float>(0, 0);
     }
 
     bool is_finished() override
@@ -127,9 +143,6 @@ public:
     }
 
 private:
-    vector<float> _target;
-    vector<float> _direction;
-    vector<float> _actual_position;
     bool reverse = false;
 };
 
@@ -160,13 +173,13 @@ namespace component
             path_list.front()->update(dt * _speed);
         }
 
-        vector<float> get_direction()
+        vector<float> get_last_direction()
         {
             if (path_list.empty())
             {
                 return (vector<float>(0, 0));
             }
-            return (path_list.front()->get_direction());
+            return (path_list.front()->get_last_direction());
         }
 
         void reset()

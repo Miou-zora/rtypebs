@@ -87,7 +87,7 @@ int main(int ac, char **av)
     proj_enemy_prefab.add_component<component::enemy>(component::enemy());
     proj_enemy_prefab.add_component<component::projectile>(component::projectile());
     component::path p3;
-    std::shared_ptr<pattern_movement> ilm2 = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 1);
+    std::shared_ptr<pattern_movement> ilm2 = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 300);
     p3.add_pattern(ilm2);
     proj_enemy_prefab.add_component<component::path>(std::move(p3));
 
@@ -97,16 +97,16 @@ int main(int ac, char **av)
     reg.emplace_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
-    std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(100, vector<float>(300, 0));
+    std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(1, vector<float>(300, 0));
     p.add_pattern(lm1);
-    std::shared_ptr<pattern_movement> lm2 = std::make_shared<linear_movement>(vector<float>(0, 100), 1);
+    std::shared_ptr<pattern_movement> lm2 = std::make_shared<linear_movement>(vector<float>(0, 100), 100);
     p.add_pattern(lm2);
-    std::shared_ptr<pattern_movement> lm3 = std::make_shared<linear_movement>(vector<float>(100, 100), 1);
+    std::shared_ptr<pattern_movement> lm3 = std::make_shared<linear_movement>(vector<float>(100, 100), 100);
     p.add_pattern(lm3);
-    std::shared_ptr<pattern_movement> rlm = std::make_shared<reverse_linear_movement>(vector<float>(0, -100), 1);
+    std::shared_ptr<pattern_movement> rlm = std::make_shared<reverse_linear_movement>(vector<float>(0, -100), 100);
     p.add_pattern(rlm);
     reg.add_component<component::path>(enemy, std::move(p));
-    reg.add_component<component::shooter>(enemy, component::shooter(std::move(proj_enemy_prefab), 200));
+    reg.add_component<component::shooter>(enemy, component::shooter(std::move(proj_enemy_prefab), 1));
     component::drawable enemy_sprite = component::drawable(reg.get_assets_manager().get_texture("enemy"), 0.5);
     reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
     reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
@@ -120,7 +120,7 @@ int main(int ac, char **av)
     reg.add_component<component::enemy>(projectile, component::enemy());
     reg.add_component<component::projectile>(projectile, component::projectile());
     component::path p2;
-    std::shared_ptr<pattern_movement> ilm = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 1);
+    std::shared_ptr<pattern_movement> ilm = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 100);
     p2.add_pattern(ilm);
     reg.add_component<component::path>(projectile, std::move(p2));
 
@@ -138,14 +138,13 @@ int main(int ac, char **av)
 
     square_prefab.instantiate(reg);
 
-    SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
 
         ClearBackground(BLACK);
-
+        reg.update_delta_time();
         reg.run_systems();
 
         EndDrawing();
