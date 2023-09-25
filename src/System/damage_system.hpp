@@ -17,32 +17,26 @@
 #include "projectile.hpp"
 
 void damage_system(registry &reg,
-                    sparse_array<component::collider> const &colliders,
-                    sparse_array<component::health> &healths)
+                   sparse_array<component::collider> const &colliders,
+                   sparse_array<component::health> &healths)
 {
     (void)reg;
     for (auto &&[index, collider, health] : indexed_zipper(colliders, healths))
     {
         for (auto &collide_with : collider.value().collided_with)
         {
-            if (reg.get_components<component::damage>()[collide_with].has_value() &&
-                (
-                    ((reg.get_components<component::enemy>()[collide_with].has_value() &&
-                    !reg.get_components<component::player>()[collide_with].has_value()) &&
-                    (reg.get_components<component::player>()[index].has_value() &&
-                    !reg.get_components<component::enemy>()[index].has_value())) ||
-                    ((reg.get_components<component::player>()[collide_with].has_value() &&
-                    !reg.get_components<component::enemy>()[collide_with].has_value()) &&
-                    (reg.get_components<component::enemy>()[index].has_value() &&
-                    !reg.get_components<component::player>()[index].has_value()))
-                )
-            )
+            if (reg.has_component<component::damage>(collide_with))
             {
-                health.value().value -= reg.get_components<component::damage>()[collide_with].value().value;
-                std::cout << "Entity " << index << " took " << reg.get_components<component::damage>()[collide_with].value().value << " damage" << std::endl;
-                // collide_with have projectile component, kill it
-                if (reg.get_components<component::projectile>()[collide_with].has_value())
-                    reg.kill_entity(reg.entity_from_index(collide_with));
+                if ((reg.has_component<component::enemy>(reg.entity_from_index(index)) &&
+                     reg.has_component<component::player>(collide_with)) ||
+                    (reg.has_component<component::player>(reg.entity_from_index(index)) &&
+                     reg.has_component<component::enemy>(collide_with)))
+                {
+                    health.value().value -= reg.get_components<component::damage>()[collide_with].value().value;
+                    std::cout << "Entity " << index << " took " << reg.get_components<component::damage>()[collide_with].value().value << " damage" << std::endl;
+                    if (reg.has_component<component::projectile>(collide_with))
+                        reg.kill_entity(collide_with);
+                }
             }
         }
     }

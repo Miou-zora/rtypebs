@@ -54,6 +54,15 @@ public:
         return (std::any_cast<sparse_array<Component> const &>(_components.at(std::type_index(typeid(Component))).list_of_instances));
     }
 
+    template <class Component>
+    bool has_component(entity_t const &e) const
+    {
+        if (get_components<Component>().size() > e)
+            if (get_components<Component>()[e].has_value())
+                return (true);
+        return (false);
+    }
+
     entity_t spawn_entity()
     {
         static int id = 0;
