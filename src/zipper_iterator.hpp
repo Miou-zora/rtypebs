@@ -98,16 +98,12 @@ public:
 private:
     // Increment every iterator at the same time . It also skips to the next value if one of the pointed to std ::optional does not contains a value.
     template <size_t... Is>
-    void incr_all(std::index_sequence<Is...> seq)
+    void incr_all(std::index_sequence<Is...>)
     {
         do {
-            if (_idx >= _max) {
-                return;
-            }
             (++std::get<Is>(_current), ...);
-
             _idx++;
-        } while (!all_set(seq));
+        } while (_idx < _max && !all_set(_seq));
     }
 
     // check if every std :: optional are set .

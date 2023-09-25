@@ -51,27 +51,17 @@ public:
         this->_current = z._current;
         this->_max = z._max;
         this->_idx = z._idx;
-        if (_idx < _max && !all_set(_seq))
-        {
-            incr_all(_seq);
-        }
     }
     indexed_zipper_iterator operator++()
     {
-        if (_idx < _max)
-        {
-            incr_all(_seq);
-        }
+        incr_all(_seq);
         return (*this);
     }
 
     indexed_zipper_iterator &operator++(int)
     {
         indexed_zipper_iterator tmp(*this);
-        if (_idx < _max)
-        {
-            incr_all(_seq);
-        }
+        incr_all(_seq);
         return (tmp);
     }
 
@@ -90,9 +80,6 @@ public:
         if (std::tie(lhs._current) != std::tie(rhs._current)) {
             return (false);
         }
-        // if (lhs._max != rhs._max || lhs._idx != rhs._idx) { // TODO: check if this is necessary, it seems to be working without it but ask to Pugo
-        //     return (false);
-        // }
         return (true);
     }
     friend bool operator!=(indexed_zipper_iterator const &lhs, indexed_zipper_iterator const &rhs)
@@ -103,15 +90,12 @@ public:
 private:
     // Increment every iterator at the same time . It also skips to the next value if one of the pointed to std ::optional does not contains a value.
     template <size_t... Is>
-    void incr_all(std::index_sequence<Is...> seq)
+    void incr_all(std::index_sequence<Is...>)
     {
         do {
-            if (_idx >= _max) {
-                return;
-            }
             (++std::get<Is>(_current), ...);
             _idx++;
-        } while (!all_set(seq));
+        } while (_idx < _max && !all_set(_seq));
     }
 
     // check if every std :: optional are set .
