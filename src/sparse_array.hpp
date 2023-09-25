@@ -107,7 +107,7 @@ public:
         return (_data[pos]);
     }
 
-    reference_type insert_at(size_type pos, Component &&other) // TODO: use allocator traits
+    reference_type insert_at(size_type pos, Component &&other)
     {
         auto allocator = _data.get_allocator();
 
@@ -120,7 +120,7 @@ public:
     }
 
     template <class... Params>
-    reference_type emplace_at(size_type pos, Params &&...other) // TODO: Axel, check this
+    reference_type emplace_at(size_type pos, Params &&...other)
     {
         auto allocator = _data.get_allocator();
 
@@ -132,7 +132,7 @@ public:
         return (_data[pos]);
     }
 
-    void erase(size_type pos) // TODO: use allocator traits
+    void erase(size_type pos)
     {
         if (_data.size() <= pos)
             return; // TODO: throw exception
