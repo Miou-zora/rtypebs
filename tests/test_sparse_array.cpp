@@ -134,3 +134,22 @@ TEST(sparse_array, erase)
         EXPECT_STREQ(e.what(), "sparse_array::erase");
     }
 }
+
+TEST(sparse_array, get_index)
+{
+    sparse_array<int> arr;
+
+    // extends
+    arr.insert_at(3, 42);
+    EXPECT_EQ(arr.size(), 4);
+    EXPECT_EQ(arr[0].has_value(), false);
+    EXPECT_EQ(arr[1].has_value(), false);
+    EXPECT_EQ(arr[2].has_value(), false);
+    EXPECT_EQ(arr[3].value(), 42);
+
+    // get index
+    EXPECT_EQ(arr.get_index(arr[3]), 3);
+    EXPECT_EQ(arr.get_index(arr[2]), 2);
+    EXPECT_EQ(arr.get_index(arr[1]), 1);
+    EXPECT_EQ(arr.get_index(arr[0]), 0);
+}

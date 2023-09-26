@@ -144,8 +144,6 @@ public:
 
     size_type get_index(value_type const &other) const
     {
-        if (!other.has_value())
-            return (_data.size());
         for (size_type i = 0; i < _data.size(); i++) {
             if (std::addressof(_data[i]) == std::addressof(other)) {
                 return (i);
