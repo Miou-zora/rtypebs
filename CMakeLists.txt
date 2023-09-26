@@ -37,7 +37,16 @@ endif()
 
 add_executable(untitled ${MAIN} ${SRC})
 enable_testing()
-add_executable(test_rtype_server tests/test_A.cpp)
+
+set(TEST_MAIN
+    "tests/main.cpp"
+)
+
+set(TEST_SRC
+    "tests/test_sparse_array.cpp"
+)
+
+add_executable(test_rtype_server ${TEST_MAIN} ${SRC} ${TEST_SRC})
 target_link_libraries(test_rtype_server gtest gtest_main)
 add_test(NAME r-type_server_test COMMAND test_rtype_server)
 target_link_libraries(untitled raylib)
