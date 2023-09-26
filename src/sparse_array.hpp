@@ -11,6 +11,7 @@
 #include <memory>
 #include <iostream>
 #include <optional>
+#include <stdexcept>
 
 template <typename Component, typename Allocator = std::allocator<std::optional<Component>>>
 class sparse_array
@@ -136,7 +137,7 @@ public:
         Allocator alloc = _data.get_allocator();
 
         if (_data.size() <= pos)
-            return; // TODO: throw exception
+            throw std::out_of_range("sparse_array::erase");
         std::allocator_traits<Allocator>::destroy(alloc, std::addressof(_data[pos]));
         _data[pos] = std::nullopt;
     }

@@ -97,3 +97,40 @@ TEST(sparse_array, emplace_at)
     EXPECT_EQ(arr[3].value().a, 42);
     EXPECT_EQ(arr[3].value().b, 21);
 }
+
+TEST(sparse_array, erase)
+{
+    sparse_array<int> arr;
+
+    // extends
+    arr.insert_at(3, 42);
+    EXPECT_EQ(arr.size(), 4);
+    EXPECT_EQ(arr[0].has_value(), false);
+    EXPECT_EQ(arr[1].has_value(), false);
+    EXPECT_EQ(arr[2].has_value(), false);
+    EXPECT_EQ(arr[3].value(), 42);
+
+    // erase
+    arr.erase(3);
+    EXPECT_EQ(arr.size(), 4);
+    EXPECT_EQ(arr[0].has_value(), false);
+    EXPECT_EQ(arr[1].has_value(), false);
+    EXPECT_EQ(arr[2].has_value(), false);
+    EXPECT_EQ(arr[3].has_value(), false);
+
+    // erase at empty place
+    arr.erase(1);
+    EXPECT_EQ(arr.size(), 4);
+    EXPECT_EQ(arr[0].has_value(), false);
+    EXPECT_EQ(arr[1].has_value(), false);
+    EXPECT_EQ(arr[2].has_value(), false);
+    EXPECT_EQ(arr[3].has_value(), false);
+
+    // erase at an index bigger than the size of the array
+    try {
+        arr.erase(4);
+        FAIL();
+    } catch (std::out_of_range const &e) {  // TODO: throw a proper exception
+        EXPECT_STREQ(e.what(), "sparse_array::erase");
+    }
+}
