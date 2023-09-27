@@ -11,6 +11,7 @@
 #include "collider.hpp"
 #include "position.hpp"
 #include "indexed_zipper.hpp"
+#include "EventManager.hpp"
 
 void collide_system(registry &reg,
                     sparse_array<component::collider> &colliders,
@@ -29,6 +30,7 @@ void collide_system(registry &reg,
                 pos_first.value().Position.y + hb_first.value().height > pos_second.value().Position.y)
             {
                 hb_first.value().collided_with.push_back(reg.entity_from_index(index_second));
+                // ecs::EventManager::getInstance().emit<COLLISION>({reg.entity_from_index(index_first), reg.entity_from_index(index_second)});
             }
         }
     }

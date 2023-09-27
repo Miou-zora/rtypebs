@@ -10,6 +10,12 @@
 #include "entity_t.hpp"
 #include <vector>
 
+// struct COLLISION
+// {
+//     entity_t entity1;
+//     entity_t entity2;
+// };
+
 namespace component
 {
     struct collider

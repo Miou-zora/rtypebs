@@ -20,6 +20,7 @@
 #include "prefab.hpp"
 #include <iostream>
 #include "raylib.h"
+#include "EventManager.hpp"
 
 int main(int ac, char **av)
 {
@@ -30,6 +31,10 @@ int main(int ac, char **av)
     int screenHeight = 800;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+
+    // ecs::EventManager::getInstance().subscribe<COLLISION>([](const COLLISION &e) {
+    //     std::cout << "COLLISION between " << e.entity1 << " and " << e.entity2 << std::endl;
+    // });
 
     registry reg;
 
