@@ -38,7 +38,8 @@ public:
             [](registry &reg, entity_t const &entity)
             {
                 sparse_array<Component> &arr = reg.get_components<Component>();
-                arr.erase(entity);
+                if (reg.has_component<Component>(entity))
+                    arr.erase(entity);
             }};
         return (std::any_cast<sparse_array<Component> &>(_components[std::type_index(typeid(Component))].list_of_instances));
     }
