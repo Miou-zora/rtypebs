@@ -18,11 +18,33 @@
 
 namespace component
 {
-    struct collider
+    class collider
     {
-        collider(int _width = 0, int _height = 0) : width(_width), height(_height) {};
-        int width;
-        int height;
-        std::vector<entity_t> collided_with;
+        public:
+            collider(int _width = 0, int _height = 0) : width(_width), height(_height) {};
+            virtual ~collider() = default;
+            int width;
+            int height;
+            std::vector<entity_t> collided_with;
+
+            bool collideWith(const vector<int> &pos, const vector<float> &offset) const
+            {
+                if (pos.x >= offset.x && pos.x <= offset.x + this->width &&
+                    pos.y >= offset.y && pos.y <= offset.y + this->height)
+                    return true;
+                return false;
+            }
+
+            bool collideWith(const vector<float> &offsetThis, const collider &other, const vector<float> &offsetOther) const
+            {
+                if (offsetThis.x < offsetOther.x + other.width &&
+                    offsetThis.x + this->width > offsetOther.x &&
+                    offsetThis.y < offsetOther.y + other.height &&
+                    offsetThis.y + this->height > offsetOther.y)
+                {
+                    return true;
+                }
+                return false;
+            }
     };
 };

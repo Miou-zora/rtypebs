@@ -21,6 +21,7 @@
 #include <iostream>
 #include "raylib.h"
 #include "EventManager.hpp"
+#include "mouse_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -47,6 +48,7 @@ int main(int ac, char **av)
     reg.add_system<component::velocity, component::path>(path_system);
     reg.add_system<component::shooter>(shoot_system);
     reg.add_system<component::position, component::velocity>(position_system);
+    reg.add_system<component::clickable, component::position, component::collider>(mouse_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
@@ -62,6 +64,7 @@ int main(int ac, char **av)
     reg.register_component<component::projectile>();
     reg.register_component<component::path>();
     reg.register_component<component::shooter>();
+    reg.register_component<component::clickable>();
 
     reg.get_assets_manager().load_texture("player", "assets/player.png");
     reg.get_assets_manager().load_texture("enemy", "assets/enemy.png");
@@ -82,6 +85,7 @@ int main(int ac, char **av)
     player_control.is_key_right_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_D)); });
     reg.add_component<component::controllable>(player, std::move(player_control));
     reg.add_component<component::drawable>(player, std::move(player_sprite));
+    reg.emplace_component<component::clickable>(player, component::clickable());
 
     prefab proj_enemy_prefab;
     proj_enemy_prefab.add_component<component::position>(0, 0);
