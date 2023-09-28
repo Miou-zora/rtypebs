@@ -39,7 +39,7 @@ int main(int ac, char **av)
 
     registry reg;
 
-    reg.add_system<component::collider, component::position>(collide_system);
+    reg.add_system<component::collider, component::position>(collide_system());
     reg.add_system<component::controllable, component::velocity>(control_system);
     reg.add_system<component::position, component::drawable>(draw_system);
     reg.add_system<component::collider, component::health>(damage_system);
@@ -48,7 +48,7 @@ int main(int ac, char **av)
     reg.add_system<component::velocity, component::path>(path_system);
     reg.add_system<component::shooter>(shoot_system);
     reg.add_system<component::position, component::velocity>(position_system);
-    reg.add_system<component::clickable, component::position, component::collider>(mouse_system);
+    reg.add_system<component::clickable, component::position, component::collider>(mouse_system());
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();

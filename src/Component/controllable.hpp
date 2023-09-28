@@ -8,7 +8,6 @@
 #ifndef CONTROLLABLE_HPP_
 #define CONTROLLABLE_HPP_
 
-#include <SFML/Graphics.hpp>
 #include <functional>
 
 namespace component
