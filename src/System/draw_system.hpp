@@ -14,7 +14,7 @@
 #include "zipper.hpp"
 #include "raylib.h"
 
-Vector2 vector_to_raylib(vector<float> const &vec)
+static Vector2 vector_to_raylib(vector<float> const &vec) // TODO: move to utils class of raylib
 {
     return (Vector2){vec.x, vec.y};
 }
