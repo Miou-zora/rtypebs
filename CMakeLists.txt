@@ -17,23 +17,9 @@ include_directories(${INCLUDE})
 
 set(MAIN "main.cpp")
 
-set(RAYLIB_VERSION 4.5.0)
-find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
-if (NOT raylib_FOUND) # If there's none, fetch and build raylib
-  include(FetchContent)
-  FetchContent_Declare(
-    raylib
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
-  )
-  FetchContent_GetProperties(raylib)
-  if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
-    set(FETCHCONTENT_QUIET NO)
-    FetchContent_Populate(raylib)
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-    add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
-  endif()
-endif()
+find_package(Boost 1.82.0 REQUIRED COMPONENTS system thread filesystem)
+find_package(GTest CONFIG REQUIRED)
+find_package(raylib CONFIG REQUIRED)
 
 add_executable(untitled ${MAIN} ${SRC})
 enable_testing()
@@ -47,7 +33,7 @@ set(TEST_SRC
 )
 
 add_executable(test_rtype_server ${TEST_MAIN} ${SRC} ${TEST_SRC})
-target_link_libraries(test_rtype_server gtest gtest_main)
+target_link_libraries(test_rtype_server GTest::gtest GTest::gtest_main)
 add_test(NAME r-type_server_test COMMAND test_rtype_server)
 target_link_libraries(untitled raylib)
 
