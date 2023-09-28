@@ -22,6 +22,11 @@
 #include "raylib.h"
 #include "EventManager.hpp"
 
+#include "NetworkMessage.hpp"
+#include "NetworkEvent.hpp"
+#include "network_client.hpp"
+#include "network_system.hpp"
+
 int main(int ac, char **av)
 {
     (void)ac;
@@ -32,9 +37,14 @@ int main(int ac, char **av)
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
-    // ecs::EventManager::getInstance().subscribe<COLLISION>([](const COLLISION &e) {
-    //     std::cout << "COLLISION between " << e.entity1 << " and " << e.entity2 << std::endl;
-    // });
+    ecs::EventManager::getInstance().subscribe<network::ClientConnectedEvent>([](const network::ClientConnectedEvent &e) {
+        (void)e;
+        std::cout << "network client connected" << std::endl;
+    });
+
+    ecs::EventManager::getInstance().subscribe<network::ClientMovedEvent>([](const network::ClientMovedEvent &e) {
+        std::cout << "network move" << e.getX() << " " << e.getY() << std::endl;
+    });
 
     registry reg;
 
@@ -143,6 +153,14 @@ int main(int ac, char **av)
 
     square_prefab.instantiate(reg);
 
+    try {
+        reg.register_component<component::network_client>();
+        entity_t client = reg.spawn_entity();
+        reg.emplace_component<component::network_client>(client, "0.0.0.0", 12345);
+        reg.add_system<component::network_client>(network_system);
+    } catch (std::exception &e) {
+        std::cout << "network error " << e.what() << std::endl;
+    }
 
     while (!WindowShouldClose())
     {
