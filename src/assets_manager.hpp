@@ -7,20 +7,31 @@
 
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
 #include <unordered_map>
+#include <iostream>
 #include "raylib.h"
 
-class assets_manager
+class AssetsManager // TODO: add .cpp
 {
+    // Singleton part
+    private:
+        AssetsManager() = default;
+    public:
+        static AssetsManager &get_instance()
+        {
+            if (!m_instance)
+                m_instance = new AssetsManager();
+            return (*m_instance);
+        }
+    private:
+        static AssetsManager *m_instance;
+
     public:
         using texture_t = Texture2D;
         using sound_t = Sound;
         using font_t = Font;
-    public:
-        assets_manager() = default;
-        virtual ~assets_manager() = default;
+
+        virtual ~AssetsManager() = default;
 
         bool load_texture(const std::string &name, const std::string &path)
         {
@@ -78,3 +89,5 @@ class assets_manager
         std::unordered_map<std::string, sound_t> _sounds;
         std::unordered_map<std::string, font_t> _fonts;
 };
+
+inline AssetsManager *AssetsManager::m_instance = nullptr;

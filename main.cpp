@@ -22,6 +22,7 @@
 #include "raylib.h"
 #include "EventManager.hpp"
 #include "mouse_system.hpp"
+#include "assets_manager.hpp"
 
 int main(int ac, char **av)
 {
@@ -66,8 +67,8 @@ int main(int ac, char **av)
     reg.register_component<component::shooter>();
     reg.register_component<component::clickable>();
 
-    reg.get_assets_manager().load_texture("player", "assets/player.png");
-    reg.get_assets_manager().load_texture("enemy", "assets/enemy.png");
+    AssetsManager::get_instance().load_texture("player", "assets/player.png");
+    AssetsManager::get_instance().load_texture("enemy", "assets/enemy.png");
 
     entity_t player = reg.spawn_entity();
 
@@ -76,7 +77,7 @@ int main(int ac, char **av)
     reg.emplace_component<component::displayable_hurtbox>(player, component::displayable_hurtbox(true));
     reg.add_component<component::health>(player, 100);
     reg.add_component<component::player>(player, component::player());
-    component::drawable player_sprite = component::drawable(reg.get_assets_manager().get_texture("player"), 0.1);
+    component::drawable player_sprite = component::drawable(AssetsManager::get_instance().get_texture("player"), 0.1);
     reg.add_component<component::collider>(player, component::collider(player_sprite.Drawable.width * player_sprite.scale, player_sprite.Drawable.height * player_sprite.scale));
     component::controllable player_control;
     player_control.is_key_up_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_W)); });
@@ -116,7 +117,7 @@ int main(int ac, char **av)
     p.add_pattern(rlm);
     reg.add_component<component::path>(enemy, std::move(p));
     reg.add_component<component::shooter>(enemy, component::shooter(std::move(proj_enemy_prefab), 1));
-    component::drawable enemy_sprite = component::drawable(reg.get_assets_manager().get_texture("enemy"), 0.5);
+    component::drawable enemy_sprite = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.5);
     reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
     reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
 
@@ -137,7 +138,7 @@ int main(int ac, char **av)
     square_prefab.add_component<component::position>(100, 100);
     square_prefab.add_component<component::velocity>(0, 0);
     square_prefab.add_component<component::displayable_hurtbox>(true);
-    component::drawable enemy_sprite2 = component::drawable(reg.get_assets_manager().get_texture("enemy"), 0.4);
+    component::drawable enemy_sprite2 = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.4);
     square_prefab.add_component<component::collider>(component::collider(enemy_sprite2.Drawable.width * enemy_sprite2.scale, enemy_sprite2.Drawable.height * enemy_sprite2.scale));
     square_prefab.add_component<component::drawable>(std::move(enemy_sprite2));
 

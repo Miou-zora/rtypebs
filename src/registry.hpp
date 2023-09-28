@@ -10,7 +10,6 @@
 
 #include "sparse_array.hpp"
 #include "entity_t.hpp"
-#include "assets_manager.hpp"
 #include <unordered_map>
 #include <typeindex>
 #include <any>
@@ -139,11 +138,6 @@ public:
         }
     }
 
-    assets_manager &get_assets_manager()
-    {
-        return (_assets_manager);
-    }
-
     float get_delta_time() const
     {
         return (_delta_time);
@@ -162,7 +156,6 @@ private:
     std::unordered_map<std::type_index, component_t> _components;
     std::vector<std::function<void(registry &)>> _systems;
     std::vector<entity_t> _dead_entities;
-    assets_manager _assets_manager;
     float _delta_time;
 };
 

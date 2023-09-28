@@ -29,8 +29,8 @@ class linear_movement : virtual public pattern_movement
 {
 public:
     linear_movement(vector<float> target, float speed = 1) : _target(target), _direction(target.normalized() * speed), _actual_position(0, 0){};
-
     linear_movement(float time, vector<float> target) : _target(target), _direction(target / time), _actual_position(0, 0){};
+    linear_movement(const linear_movement &other) : _target(other._target), _direction(other._direction), _actual_position(other._actual_position), _last_direction(other._last_direction) {};
 
     vector<float> get_last_direction() override
     {
@@ -70,6 +70,7 @@ class infinite_linear_movement : virtual public linear_movement
 {
 public:
     infinite_linear_movement(vector<float> target, float speed = 1) : linear_movement(target, speed) {};
+    infinite_linear_movement(float time, vector<float> target) : linear_movement(time, target) {};
 
     void update(float dt) override
     {
@@ -88,6 +89,7 @@ class reverse_linear_movement : virtual public linear_movement
 public:
     reverse_linear_movement(vector<float> target, float speed = 1) : linear_movement(target, speed) {};
     reverse_linear_movement(float time, vector<float> target) : linear_movement(time, target) {};
+    reverse_linear_movement(const reverse_linear_movement &other) : linear_movement(other), reverse(other.reverse) {};
 
     vector<float> get_last_direction() override
     {
@@ -155,6 +157,8 @@ namespace component
 
     public:
         path(float speed = 1, list_of_pattern _path = list_of_pattern()) : path_list(_path), _speed(speed){};
+
+        path(const path &other) : path_list(other.path_list), _speed(other._speed){};
 
         void add_pattern(std::shared_ptr<pattern_movement> pattern)
         {
