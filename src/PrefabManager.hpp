@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <unordered_map>
+#include <map>
 #include <string>
 #include "prefab.hpp"
 #include <memory>
@@ -50,8 +50,22 @@ class PrefabManager {
             return (_prefabs.at(name)->instantiate(reg));
         }
 
+        friend std::ostream &operator<<(std::ostream &os, const PrefabManager &manager);
+
     private:
-        std::unordered_map<std::string, std::unique_ptr<prefab>> _prefabs;
+        std::map<std::string, std::unique_ptr<prefab>> _prefabs;
 };
+
+std::ostream &operator<<(std::ostream &os, const PrefabManager &manager)
+{
+    os << "(";
+    for (auto &&[name, prefab] : manager._prefabs) {
+        os << name;
+        if (prefab != manager._prefabs.rbegin()->second)
+            os << ", ";
+    }
+    os << ")";
+    return (os);
+}
 
 inline PrefabManager *PrefabManager::m_instance = nullptr;

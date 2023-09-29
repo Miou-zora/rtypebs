@@ -159,6 +159,7 @@ int main(int ac, char **av)
     reg.add_component<component::collider>(sphere, component::collider(sphere_animation.source_rect.width * sphere_animation.scale, sphere_animation.source_rect.height * sphere_animation.scale));
     reg.add_component<component::animation>(sphere, std::move(sphere_animation));
 
+    std::cout << "Prefabs: " << PrefabManager::get_instance() << std::endl;
 
     while (!WindowShouldClose())
     {
