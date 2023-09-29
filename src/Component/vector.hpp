@@ -145,6 +145,16 @@ public:
         return (vector<T>(x / get_length(), y / get_length()));
     }
 
+    T distance(const vector<T> &other) const
+    {
+        return (std::sqrt(std::pow(x - other.x, 2) + std::pow(y - other.y, 2)));
+    }
+
+    static vector<T> getVector(const vector<T> &a, const vector<T> &b)
+    {
+        return (vector<T>(b.x - a.x, b.y - a.y));
+    }
+
     T x;
     T y;
 };

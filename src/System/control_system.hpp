@@ -20,8 +20,11 @@ void control_system(registry &reg,
     (void)reg;
     for (auto &&[cont, vel] : zipper(controllables, velocities))
     {
-        vel.value().Velocity.x = (cont.value().is_key_right_pressed() - cont.value().is_key_left_pressed());
-        vel.value().Velocity.y = (cont.value().is_key_down_pressed() - cont.value().is_key_up_pressed());
+        vector<float> direction((cont.value().is_key_right_pressed() - cont.value().is_key_left_pressed()), (cont.value().is_key_down_pressed() - cont.value().is_key_up_pressed()));
+        if (direction.get_length() != 0)
+            vel.value().Velocity = direction.normalized() * cont.value().speed * reg.get_delta_time();
+        else
+            vel.value().Velocity = vector<float>(0, 0);
     }
 }
 

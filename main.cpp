@@ -26,6 +26,7 @@
 #include "animation_system.hpp"
 #include "PrefabManager.hpp"
 #include "player_shoot_system.hpp"
+#include "spawner_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -46,11 +47,12 @@ int main(int ac, char **av)
     reg.add_system<component::collider, component::health>(damage_system);
     reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
     reg.add_system<component::collider, component::projectile>(projectile_system);
-    reg.add_system<component::velocity, component::path>(path_system);
+    reg.add_system<component::velocity, component::path, component::position>(path_system);
     reg.add_system<component::playerShooter, component::controllable>(player_shoot_system);
     reg.add_system<component::shooter>(shoot_system);
     reg.add_system<component::position, component::velocity>(position_system);
-    reg.add_system<component::clickable, component::position, component::collider>(mouse_system()); 
+    reg.add_system<component::clickable, component::position, component::collider>(mouse_system());
+    reg.add_system<component::Spawner>(spawner_system());
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
@@ -69,6 +71,7 @@ int main(int ac, char **av)
     reg.register_component<component::playerShooter>();
     reg.register_component<component::clickable>();
     reg.register_component<component::animation>();
+    reg.register_component<component::Spawner>();
 
     AssetsManager::get_instance().load_texture("player", "assets/player.png");
     AssetsManager::get_instance().load_texture("enemy", "assets/enemy.png");
@@ -102,7 +105,7 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::player>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().add_pattern<infinite_linear_movement>(vector<float>(1, 0), 300));
+        .add_component<component::path>(component::path().AddPoint(-300, 0));
 
 
     PrefabManager::get_instance().CreatePrefab("proj_enemy_prefab")
@@ -113,7 +116,7 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::enemy>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().add_pattern<infinite_linear_movement>(vector<float>(-1, 0), 300));
+        .add_component<component::path>(component::path().AddPoint(200, 200));
 
     entity_t enemy = reg.spawn_entity();
     reg.add_component<component::position>(enemy, component::position(200, 200));
@@ -121,10 +124,12 @@ int main(int ac, char **av)
     reg.add_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
-    p.add_pattern<linear_movement>(1, vector<float>(300, 0))
-        .add_pattern<linear_movement>(vector<float>(0, 100), 100)
-        .add_pattern<linear_movement>(vector<float>(100, 100), 100)
-        .add_pattern<reverse_linear_movement>(vector<float>(0, -100), 100);
+    // p.add_pattern<linear_movement>(1, vector<float>(300, 0))
+    //     .add_pattern<linear_movement>(vector<float>(0, 100), 100)
+    //     .add_pattern<linear_movement>(vector<float>(100, 100), 100)
+    //     .add_pattern<reverse_linear_movement>(vector<float>(0, -100), 100);
+    p.AddPoint(400, 200);
+    p.AddPoint(400, 300);
     reg.add_component<component::path>(enemy, std::move(p));
     reg.add_component<component::shooter>(enemy, component::shooter("proj_enemy_prefab", 1));
     reg.add_component<component::health>(enemy, 100);
@@ -140,7 +145,7 @@ int main(int ac, char **av)
     reg.add_component<component::damage>(projectile, component::damage(10));
     reg.add_component<component::enemy>(projectile, component::enemy());
     reg.add_component<component::projectile>(projectile, component::projectile());
-    reg.add_component<component::path>(projectile, std::move(component::path().add_pattern<infinite_linear_movement>(vector<float>(-1, 0), 100)));
+    reg.add_component<component::path>(projectile, std::move(component::path().AddPoint(200, 200)));
 
 
     component::drawable square_prefab_drawable = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.4);
@@ -175,6 +180,27 @@ int main(int ac, char **av)
     sphere_animation.finished = false;
     reg.add_component<component::collider>(sphere, component::collider(sphere_animation.source_rect.width * sphere_animation.scale, sphere_animation.source_rect.height * sphere_animation.scale));
     reg.add_component<component::animation>(sphere, std::move(sphere_animation));
+
+    PrefabManager::get_instance().CreatePrefab("diagonal_enemy")
+        .add_component<component::position>(500, 100)
+        .add_component<component::velocity>(0, 0)
+        .add_component<component::displayable_hurtbox>(true)
+        .add_component<component::drawable>(AssetsManager::get_instance().get_texture("enemy"), 0.5)
+        .add_component<component::collider>(component::collider(AssetsManager::get_instance().get_texture("enemy").width * 0.5, AssetsManager::get_instance().get_texture("enemy").height * 0.5))
+        .add_component<component::path>(component::path()
+            // .add_pattern<linear_movement>(vector<float>(-300, 300), 100)
+            // .add_pattern<linear_movement>(vector<float>(300, 300), 100))
+            .AddPoint(300, 300)
+            .AddPoint(500, 500)
+            .AddPoint(1000, 500)
+            .SetDestroyAtEnd(true))
+        .add_component<component::shooter>(component::shooter("proj_enemy_prefab", 1));
+
+    entity_t spawner = reg.spawn_entity();
+    component::Spawner spawner_component;
+    spawner_component._spawnList.push_back(std::make_pair(2, "diagonal_enemy"));
+    spawner_component._spawnList.push_back(std::make_pair(4, "diagonal_enemy"));
+    reg.add_component<component::Spawner>(spawner, std::move(spawner_component));
 
     std::cout << "Prefabs: " << PrefabManager::get_instance() << std::endl;
 
