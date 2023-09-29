@@ -1,114 +1,135 @@
 #pragma once
 
-#include <map>
 #include <string>
-#include <iostream>
+#include <ctime>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
 
-#include "EventManager.hpp"
-#include "NetworkMessage.hpp"
+#include <boost/array.hpp>
 
 namespace network {
-    class NetworkEvent {
-        public:
-            NetworkEvent() {};
-            virtual ~NetworkEvent() = default;
+    namespace event {
+        static const u_int32_t MAX_PACKET_SIZE = 128;
+        static const char MAGIC[3] = {'B', 'T', 'C'};
+        static u_int64_t g_packetId = 0;
 
-            virtual u_int8_t getType() = 0;
-            virtual u_int32_t getLength() = 0;
-            virtual std::string serialize() = 0;
+        #pragma pack(push, 1)
+        struct NetworkMessageHeader {
+            char magic[3];
+            u_int8_t type;
+            u_int64_t id;
+            time_t timestamp;
+            u_int32_t length;
+        };
+        #pragma pack(pop)
 
-            template<typename T>
-            T deserialize(char *buffer)
+        // comparator for priority queue _Compare
+        struct NetworkMessageHeaderCompare {
+            bool operator()(const NetworkMessageHeader &lhs, const NetworkMessageHeader &rhs) const
             {
-                return T::deserialize(buffer);
-            };
-    };
-
-    class ClientConnectedEvent : public NetworkEvent {
-        public:
-            ClientConnectedEvent() {};
-            ~ClientConnectedEvent() = default;
-
-            u_int8_t getType() override
-            {
-                return 0;
-            };
-
-            u_int32_t getLength() override
-            {
-                return 0;
-            };
-
-            std::string serialize() override
-            {
-                return "";
-            };
-
-            static ClientConnectedEvent deserialize(char *)
-            {
-                return ClientConnectedEvent();
-            };
-    };
-
-    class ClientMovedEvent : public NetworkEvent {
-        private:
-            u_int32_t m_x;
-            u_int32_t m_y;
-    
-        public:
-            ClientMovedEvent(u_int32_t x, u_int32_t y) : m_x(x), m_y(y) {};
-            ~ClientMovedEvent() = default;
-
-            u_int8_t getType() override
-            {
-                return 1;
+                return (lhs.id > rhs.id || (lhs.id == rhs.id && lhs.timestamp > rhs.timestamp));
             }
 
-            u_int32_t getLength() override
+            bool operator()(const NetworkMessageHeader &lhs, const char *rhs) const
             {
-                return sizeof(m_x) + sizeof(m_y);
+                const NetworkMessageHeader *header = reinterpret_cast<const NetworkMessageHeader *>(rhs);
+                return (this->operator()(lhs, *header));
             }
 
-            std::string serialize() override
+            bool operator()(const char *lhs, const NetworkMessageHeader &rhs) const
             {
-                std::string buffer;
-                buffer.append(reinterpret_cast<char *>(&m_x), sizeof(m_x));
-                buffer.append(reinterpret_cast<char *>(&m_y), sizeof(m_y));
-                return buffer;
+                const NetworkMessageHeader *header = reinterpret_cast<const NetworkMessageHeader *>(lhs);
+                return (this->operator()(*header, rhs));
             }
 
-            static ClientMovedEvent deserialize(char *buffer)
+            bool operator()(const char *lhs, const char *rhs) const
             {
-                u_int32_t x = *reinterpret_cast<u_int32_t *>(buffer);
-                u_int32_t y = *reinterpret_cast<u_int32_t *>(buffer + sizeof(m_x));
-                return ClientMovedEvent(x, y);
+                const NetworkMessageHeader *header_lhs = reinterpret_cast<const NetworkMessageHeader *>(lhs);
+                const NetworkMessageHeader *header_rhs = reinterpret_cast<const NetworkMessageHeader *>(rhs);
+                return (this->operator()(*header_lhs, *header_rhs));
+            }
+
+            bool operator()(const boost::array<char, MAX_PACKET_SIZE> &lhs, const boost::array<char, MAX_PACKET_SIZE> &rhs) const
+            {
+                const NetworkMessageHeader *header_lhs = reinterpret_cast<const NetworkMessageHeader *>(lhs.data());
+                const NetworkMessageHeader *header_rhs = reinterpret_cast<const NetworkMessageHeader *>(rhs.data());
+                return (this->operator()(*header_lhs, *header_rhs));
+            }
+        };
+
+        bool checkMagic(char *buffer)
+        {
+            return std::memcmp(buffer, MAGIC, sizeof(MAGIC)) == 0;
+        }
+
+        namespace in {
+            #pragma pack(push, 1)
+            struct WelcomeMessage {
+                WelcomeMessage() = default;
+
+                NetworkMessageHeader header;
+                static const u_int8_t type = 0;
             };
 
-            u_int32_t getX() const
-            {
-                return m_x;
-            }
+            struct MoveMessage {
+                MoveMessage(u_int32_t _x, u_int32_t _y)
+                    : x(_x), y(_y) {}
 
-            u_int32_t getY() const
-            {
-                return m_y;
-            }
-    };
+                NetworkMessageHeader header;
+                static const u_int8_t type = 1;
+                u_int32_t x;
+                u_int32_t y;
+            };
+            #pragma pack(pop)
+        }
 
-    void emitMatchingEvent(char *data)
-    {
-        network::NetworkMessageHeader *header = reinterpret_cast<network::NetworkMessageHeader *>(data);
-        char *buffer = data + sizeof(network::NetworkMessageHeader);
-        std::cout << "type: " << static_cast<int>(header->type) << std::endl;
-        switch (header->type) {
-            case 0:
-                ecs::EventManager::getInstance().emit<network::ClientConnectedEvent>(network::ClientConnectedEvent::deserialize(buffer));
-                break;
-            case 1:
-                ecs::EventManager::getInstance().emit<network::ClientMovedEvent>(network::ClientMovedEvent::deserialize(buffer));
-                break;
-            default:
-                break;
+        namespace out {
+            #pragma pack(push, 1)
+            struct ConnectMessage {
+                ConnectMessage() = default;
+
+                NetworkMessageHeader header;
+                static const u_int8_t type = 0;
+            };
+
+            struct MoveMessage {
+                MoveMessage(u_int32_t _x, u_int32_t _y)
+                    : x(_x), y(_y) {}
+
+                NetworkMessageHeader header;
+                u_int32_t x;
+                u_int32_t y;
+                static const u_int8_t type = 1;
+            };
+            #pragma pack(pop)
+        }
+
+        template<typename T, class ...Args>
+        T createEvent(Args &&...args)
+        {
+            T message(std::forward<Args>(args)...);
+            std::memcpy(message.header.magic, MAGIC, 3);
+            message.header.type = T::type;
+            message.header.id = g_packetId++;
+            message.header.timestamp = std::time(nullptr);
+            message.header.length = sizeof(T);
+            return (message);
+        }
+
+        template<typename T>
+        void pack(char *buffer, T &message)
+        {
+            std::memcpy(buffer, &message, sizeof(T));
+        }
+
+        template<typename T>
+        T unpack(char *buffer, size_t msg_size)
+        {
+            if (msg_size != sizeof(T)) {
+                throw std::runtime_error("malformed message, invalid type");
+            }
+            return (*reinterpret_cast<T *>(buffer));
         }
     }
 }
