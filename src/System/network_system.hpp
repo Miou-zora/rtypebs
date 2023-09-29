@@ -8,8 +8,10 @@
 #include "network_client.hpp"
 #include "controllable.hpp"
 
+#include "EventManager.hpp"
 
-static void printHexBytes(const unsigned char* data, size_t length) {
+
+static void printHexBytes2(const unsigned char* data, size_t length) {
     for (size_t i = 0; i < length; i++) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[i]) << ' ';
     }
@@ -30,7 +32,13 @@ void network_read_system(registry &r,
             std::cout << "Received message length: " << header->length << std::endl;
             std::cout << "Received message id: " << header->id << std::endl;
             std::cout << "Received message timestamp: "<< header->timestamp << std::endl;
-            printHexBytes(reinterpret_cast<const unsigned char *>(message.data()), message.size());
+            printHexBytes2(reinterpret_cast<const unsigned char *>(message.data()), header->length);
+            switch (header->type) {
+                case 1:
+                    network::event::in::MoveMessage unpacked = network::event::unpack<network::event::in::MoveMessage>(message.data());
+                    ecs::EventManager::getInstance().emit<network::event::in::MoveMessage>(unpacked);
+                    break;
+            }
         }
     }
 }

@@ -38,12 +38,17 @@ int main(int ac, char **av)
 
     registry reg;
 
+    reg.get_assets_manager().load_texture("player", "assets/player.png");
+
     reg.register_component<component::network_client>();
     reg.register_component<component::controllable>();
+    reg.register_component<component::position>();
+    reg.register_component<component::drawable>();
 
     reg.add_system<component::network_client>(network_read_system);
     reg.add_system<component::network_client>(network_write_system);
     reg.add_system<component::controllable, component::network_client>(network_control_system);
+    reg.add_system<component::position, component::drawable>(draw_system);
 
     entity_t player = reg.spawn_entity();
 
@@ -54,6 +59,18 @@ int main(int ac, char **av)
     player_control.is_key_left_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_A)); });
     player_control.is_key_right_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_D)); });
     reg.add_component<component::controllable>(player, std::move(player_control));
+    reg.emplace_component<component::position>(player, 50, 50);
+    component::drawable player_sprite = component::drawable(reg.get_assets_manager().get_texture("player"), 0.1);
+    reg.add_component<component::drawable>(player, std::move(player_sprite));
+
+    ecs::EventManager::getInstance().subscribe<network::event::in::MoveMessage>([&reg, player](const network::event::in::MoveMessage &event) {
+        std::cout << "Received move message" << std::endl;
+        auto &position = reg.get_components<component::position>()[player].value();
+        std::cout << "Position: " << position.Position.x << ", " << position.Position.y << std::endl;
+        std::cout << "received x: " << event.x << "y: " << event.y << std::endl;
+        position.Position.x += event.x;
+        position.Position.y += event.y;
+    });
 
     while (!WindowShouldClose())
     {

@@ -34,8 +34,11 @@ while True:
     
     else:
         # move message
-        message = struct.pack('qq', 1, 1)
-        header = struct.pack(header_format, 667, tim, 40)
+        tim = int(time.time())
+        received_data = struct.unpack("ii", data[24:])
+        print("received_data", received_data)
+        message = struct.pack('ii', *received_data)
+        header = struct.pack(header_format, 667, tim, 32)
         header = b"BTC\x01" + header + message
         print("send struct", hex(1), hex(667), hex(tim), len(header), hexlify(header), header)
 

@@ -15,6 +15,15 @@
 
 using namespace boost::placeholders;
 
+#include <iostream>
+#include <iomanip>
+static void printHexBytes(const unsigned char* data, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[i]) << ' ';
+    }
+    std::cout << std::endl;
+}
+
 namespace component {
     struct network_client {
         using Message = boost::array<char, network::event::MAX_PACKET_SIZE>;
@@ -109,6 +118,7 @@ namespace component {
                     std::cout << "network warning: received message has invalid magic" << std::endl;
                 } else {
                     network::event::NetworkMessageHeader *header = reinterpret_cast<network::event::NetworkMessageHeader *>(m_recvBuffer.data());
+                    printHexBytes(reinterpret_cast<const unsigned char *>(m_recvBuffer.data()), header->length);
                     if (header->length != bytes_transferred) {
                         std::cout << "expected length: " << header->length << " actual length: " << bytes_transferred << std::endl;
                         std::cout << "network warning: received malformed message" << std::endl;

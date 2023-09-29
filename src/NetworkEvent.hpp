@@ -78,8 +78,8 @@ namespace network {
 
                 NetworkMessageHeader header;
                 static const u_int8_t type = 1;
-                u_int32_t x;
-                u_int32_t y;
+                int32_t x;
+                int32_t y;
             };
             #pragma pack(pop)
         }
@@ -98,8 +98,8 @@ namespace network {
                     : x(_x), y(_y) {}
 
                 NetworkMessageHeader header;
-                u_int32_t x;
-                u_int32_t y;
+                int32_t x;
+                int32_t y;
                 static const u_int8_t type = 1;
             };
             #pragma pack(pop)
@@ -132,11 +132,8 @@ namespace network {
         }
 
         template<typename T>
-        T unpack(char *buffer, size_t msg_size)
+        T unpack(char *buffer)
         {
-            if (msg_size != sizeof(T)) {
-                throw std::runtime_error("malformed message, invalid type");
-            }
             return (*reinterpret_cast<T *>(buffer));
         }
     }
