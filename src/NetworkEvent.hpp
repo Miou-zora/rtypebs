@@ -124,6 +124,14 @@ namespace network {
         }
 
         template<typename T>
+        boost::array<char, MAX_PACKET_SIZE> pack(T &message)
+        {
+            boost::array<char, MAX_PACKET_SIZE> buffer;
+            std::memcpy(buffer.data(), &message, sizeof(T));
+            return (buffer);
+        }
+
+        template<typename T>
         T unpack(char *buffer, size_t msg_size)
         {
             if (msg_size != sizeof(T)) {

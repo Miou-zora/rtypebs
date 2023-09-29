@@ -24,6 +24,39 @@ namespace component {
             network::event::NetworkMessageHeaderCompare
         >;
 
+        class SafeMessageQueue {   
+            public:
+                SafeMessageQueue() = default;
+                ~SafeMessageQueue() = default;
+
+                void push(Message const &message)
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_queue.push(message);
+                }
+
+                void pop()
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_queue.pop();
+                }
+
+                Message top()
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    return m_queue.top();
+                }
+
+                bool empty()
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    return m_queue.empty();
+                }
+            private:
+                MessageQueue m_queue;
+                std::mutex m_mutex; 
+        };
+
         network_client(std::string ip, int port)
         {
             m_ip = ip;
@@ -34,8 +67,8 @@ namespace component {
             m_socket = std::make_shared<boost::asio::ip::udp::socket>(*m_ioContext);
             m_socket->open(boost::asio::ip::udp::v4());
             m_socket->async_connect(*m_endpoint, boost::bind(&network_client::handle_connect, this, boost::asio::placeholders::error));
-            m_inbox = std::make_shared<MessageQueue>();
-            m_inboxMutex = std::make_shared<std::mutex>();
+            m_inbox = std::make_shared<SafeMessageQueue>();
+            m_outbox = std::make_shared<SafeMessageQueue>();
             m_thread = std::make_shared<std::thread>([this](){ m_ioContext->run(); });
         }
 
@@ -48,10 +81,9 @@ namespace component {
         void handle_connect(const boost::system::error_code& error)
         {
             if (!error) {
-                char buffer[sizeof(network::event::out::ConnectMessage)];
                 network::event::out::ConnectMessage message = network::event::createEvent<network::event::out::ConnectMessage>();
-                network::event::pack<network::event::out::ConnectMessage>(buffer, message);
-                m_socket->async_send_to(boost::asio::buffer(buffer), *m_endpoint,
+                boost::array<char, network::event::MAX_PACKET_SIZE> packed = network::event::pack<network::event::out::ConnectMessage>(message);
+                m_socket->async_send_to(boost::asio::buffer(packed, message.header.length), *m_endpoint,
                     boost::bind(&network_client::handle_send, this, boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
             }
@@ -81,7 +113,6 @@ namespace component {
                         std::cout << "expected length: " << header->length << " actual length: " << bytes_transferred << std::endl;
                         std::cout << "network warning: received malformed message" << std::endl;
                     } else {
-                        std::lock_guard<std::mutex> lock(*m_inboxMutex);
                         m_inbox->push(m_recvBuffer);
                     }
                 }
@@ -93,22 +124,22 @@ namespace component {
                     boost::asio::placeholders::bytes_transferred));
         }
 
-        bool has_message()
+        SafeMessageQueue &get_inbox()
         {
-            std::lock_guard<std::mutex> lock(*m_inboxMutex);
-            return !m_inbox->empty();
+            return *m_inbox;
         }
 
-        Message message_top()
+        SafeMessageQueue &get_outbox()
         {
-            std::lock_guard<std::mutex> lock(*m_inboxMutex);
-            return m_inbox->top();
+            return *m_outbox;
         }
 
-        void message_pop()
+        void socket_send(Message const &message)
         {
-            std::lock_guard<std::mutex> lock(*m_inboxMutex);
-            m_inbox->pop();
+            const network::event::NetworkMessageHeader *header = reinterpret_cast<network::event::NetworkMessageHeader const *>(message.data());
+            m_socket->async_send_to(boost::asio::buffer(message.data(), header->length), *m_endpoint,
+                boost::bind(&network_client::handle_send, this, boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred));
         }
 
         std::string m_ip;
@@ -118,8 +149,8 @@ namespace component {
         std::shared_ptr<boost::asio::ip::udp::endpoint> m_endpoint;
         std::shared_ptr<boost::asio::ip::udp::socket> m_socket;
         boost::array<char, network::event::MAX_PACKET_SIZE> m_recvBuffer;
-        std::shared_ptr<MessageQueue> m_inbox;
-        std::shared_ptr<std::mutex> m_inboxMutex;
+        std::shared_ptr<SafeMessageQueue> m_inbox;
+        std::shared_ptr<SafeMessageQueue> m_outbox;
         std::shared_ptr<std::thread> m_thread;
     };
 };

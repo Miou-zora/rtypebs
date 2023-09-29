@@ -41,12 +41,19 @@ int main(int ac, char **av)
     reg.register_component<component::network_client>();
     reg.register_component<component::controllable>();
 
-    reg.add_system<component::controllable, component::network_client>(network_system);
+    reg.add_system<component::network_client>(network_read_system);
+    reg.add_system<component::network_client>(network_write_system);
+    reg.add_system<component::controllable, component::network_client>(network_control_system);
 
     entity_t player = reg.spawn_entity();
 
     reg.emplace_component<component::network_client>(player, "localhost", 12345);
-    reg.emplace_component<component::controllable>(player);
+    component::controllable player_control;
+    player_control.is_key_up_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_W)); });
+    player_control.is_key_down_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_S)); });
+    player_control.is_key_left_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_A)); });
+    player_control.is_key_right_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_D)); });
+    reg.add_component<component::controllable>(player, std::move(player_control));
 
     while (!WindowShouldClose())
     {

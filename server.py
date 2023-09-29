@@ -21,24 +21,23 @@ while True:
 
     print("received", len(data), hexlify(data))
 
-    # create a message header
-    tim = int(time.time())
-    message = b""
-    header = struct.pack(header_format, 667, tim, 24)
-    header = b"BTC\x00" + header + message
-    print("send struct", hex(0), hex(667), hex(tim), len(header), hexlify(header), header)
+    if data.startswith(b"BTC\x00"):
+        # create a message header
+        tim = int(time.time())
+        message = b""
+        header = struct.pack(header_format, 667, tim, 24)
+        header = b"BTC\x00" + header + message
+        print("send struct", hex(0), hex(667), hex(tim), len(header), hexlify(header), header)
 
-    # send the header to the client
-    sock.sendto(header, address)
+        # send the header to the client
+        sock.sendto(header, address)
     
-    data, address = sock.recvfrom(4096)
-    print("received", len(data), hexlify(data))
-    # move message
+    else:
+        # move message
+        message = struct.pack('qq', 1, 1)
+        header = struct.pack(header_format, 667, tim, 40)
+        header = b"BTC\x01" + header + message
+        print("send struct", hex(1), hex(667), hex(tim), len(header), hexlify(header), header)
 
-    message = struct.pack('qq', 20, 20)
-    header = struct.pack(header_format, 667, tim, 40)
-    header = b"BTC\x01" + header + message
-    print("send struct", hex(1), hex(667), hex(tim), len(header), hexlify(header), header)
-
-    # send the header to the client
-    sock.sendto(header, address)
+        # send the header to the client
+        sock.sendto(header, address)
