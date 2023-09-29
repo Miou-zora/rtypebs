@@ -78,8 +78,8 @@ namespace network {
 
                 NetworkMessageHeader header;
                 static const u_int8_t type = 1;
-                int32_t x;
-                int32_t y;
+                float x;
+                float y;
             };
             #pragma pack(pop)
         }

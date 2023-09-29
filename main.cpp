@@ -59,7 +59,7 @@ int main(int ac, char **av)
     player_control.is_key_left_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_A)); });
     player_control.is_key_right_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_D)); });
     reg.add_component<component::controllable>(player, std::move(player_control));
-    reg.emplace_component<component::position>(player, 50, 50);
+    reg.emplace_component<component::position>(player, 0, 0);
     component::drawable player_sprite = component::drawable(reg.get_assets_manager().get_texture("player"), 0.1);
     reg.add_component<component::drawable>(player, std::move(player_sprite));
 
@@ -68,8 +68,8 @@ int main(int ac, char **av)
         auto &position = reg.get_components<component::position>()[player].value();
         std::cout << "Position: " << position.Position.x << ", " << position.Position.y << std::endl;
         std::cout << "received x: " << event.x << "y: " << event.y << std::endl;
-        position.Position.x += event.x;
-        position.Position.y += event.y;
+        position.Position.x = event.x;
+        position.Position.y = event.y;
     });
 
     while (!WindowShouldClose())
