@@ -24,6 +24,7 @@
 #include "mouse_system.hpp"
 #include "assets_manager.hpp"
 #include "animation_system.hpp"
+#include "PrefabManager.hpp"
 
 int main(int ac, char **av)
 {
@@ -34,10 +35,6 @@ int main(int ac, char **av)
     int screenHeight = 800;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
-
-    // ecs::EventManager::getInstance().subscribe<COLLISION>([](const COLLISION &e) {
-    //     std::cout << "COLLISION between " << e.entity1 << " and " << e.entity2 << std::endl;
-    // });
 
     registry reg;
 
@@ -92,18 +89,15 @@ int main(int ac, char **av)
     reg.add_component<component::drawable>(player, std::move(player_sprite));
     reg.emplace_component<component::clickable>(player, component::clickable());
 
-    prefab proj_enemy_prefab;
-    proj_enemy_prefab.add_component<component::position>(0, 0);
-    proj_enemy_prefab.add_component<component::velocity>(0, 0);
-    proj_enemy_prefab.add_component<component::collider>(10, 5);
-    proj_enemy_prefab.add_component<component::displayable_hurtbox>(true);
-    proj_enemy_prefab.add_component<component::damage>(10);
-    proj_enemy_prefab.add_component<component::enemy>(component::enemy());
-    proj_enemy_prefab.add_component<component::projectile>(component::projectile());
-    component::path p3;
-    std::shared_ptr<pattern_movement> ilm2 = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 300);
-    p3.add_pattern(ilm2);
-    proj_enemy_prefab.add_component<component::path>(std::move(p3));
+    PrefabManager::get_instance().CreatePrefab("proj_enemy_prefab")
+        .add_component<component::velocity>(0, 0)
+        .add_component<component::position>(0, 0)
+        .add_component<component::collider>(10, 5)
+        .add_component<component::displayable_hurtbox>(true)
+        .add_component<component::damage>(10)
+        .add_component<component::enemy>(component::enemy())
+        .add_component<component::projectile>(component::projectile())
+        .add_component<component::path>(component::path().add_pattern<infinite_linear_movement>(vector<float>(-1, 0), 300));
 
     entity_t enemy = reg.spawn_entity();
     reg.emplace_component<component::position>(enemy, 200, 200);
@@ -111,16 +105,12 @@ int main(int ac, char **av)
     reg.emplace_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
-    std::shared_ptr<pattern_movement> lm1 = std::make_shared<linear_movement>(1, vector<float>(300, 0));
-    p.add_pattern(lm1);
-    std::shared_ptr<pattern_movement> lm2 = std::make_shared<linear_movement>(vector<float>(0, 100), 100);
-    p.add_pattern(lm2);
-    std::shared_ptr<pattern_movement> lm3 = std::make_shared<linear_movement>(vector<float>(100, 100), 100);
-    p.add_pattern(lm3);
-    std::shared_ptr<pattern_movement> rlm = std::make_shared<reverse_linear_movement>(vector<float>(0, -100), 100);
-    p.add_pattern(rlm);
+    p.add_pattern<linear_movement>(1, vector<float>(300, 0))
+        .add_pattern<linear_movement>(vector<float>(0, 100), 100)
+        .add_pattern<linear_movement>(vector<float>(100, 100), 100)
+        .add_pattern<reverse_linear_movement>(vector<float>(0, -100), 100);
     reg.add_component<component::path>(enemy, std::move(p));
-    reg.add_component<component::shooter>(enemy, component::shooter(std::move(proj_enemy_prefab), 1));
+    reg.add_component<component::shooter>(enemy, component::shooter("proj_enemy_prefab", 1));
     component::drawable enemy_sprite = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.5);
     reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
     reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
@@ -133,24 +123,22 @@ int main(int ac, char **av)
     reg.add_component<component::damage>(projectile, component::damage(10));
     reg.add_component<component::enemy>(projectile, component::enemy());
     reg.add_component<component::projectile>(projectile, component::projectile());
-    component::path p2;
-    std::shared_ptr<pattern_movement> ilm = std::make_shared<infinite_linear_movement>(vector<float>(-1, 0), 100);
-    p2.add_pattern(ilm);
-    reg.add_component<component::path>(projectile, std::move(p2));
+    reg.add_component<component::path>(projectile, std::move(component::path().add_pattern<infinite_linear_movement>(vector<float>(-1, 0), 100)));
 
-    prefab square_prefab;
-    square_prefab.add_component<component::position>(100, 100);
-    square_prefab.add_component<component::velocity>(0, 0);
-    square_prefab.add_component<component::displayable_hurtbox>(true);
-    component::drawable enemy_sprite2 = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.4);
-    square_prefab.add_component<component::collider>(component::collider(enemy_sprite2.Drawable.width * enemy_sprite2.scale, enemy_sprite2.Drawable.height * enemy_sprite2.scale));
-    square_prefab.add_component<component::drawable>(std::move(enemy_sprite2));
 
-    entity_t square = square_prefab.instantiate(reg);
+    component::drawable square_prefab_drawable = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.4);
+    PrefabManager::get_instance().CreatePrefab("square_prefab")
+        .add_component<component::position>(100, 100)
+        .add_component<component::velocity>(0, 0)
+        .add_component<component::displayable_hurtbox>(true)
+        .add_component<component::collider>(component::collider(square_prefab_drawable.Drawable.width * square_prefab_drawable.scale, square_prefab_drawable.Drawable.height * square_prefab_drawable.scale))
+        .add_component<component::drawable>(square_prefab_drawable);
+
+    entity_t square = PrefabManager::get_instance().Instantiate("square_prefab", reg);
     reg.get_components<component::position>()[square].value().Position.x = 500;
     reg.get_components<component::position>()[square].value().Position.y = 500;
 
-    square_prefab.instantiate(reg);
+    PrefabManager::get_instance().Instantiate("square_prefab", reg);
 
     entity_t sphere = reg.spawn_entity();
     reg.emplace_component<component::position>(sphere, 700, 700);

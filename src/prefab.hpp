@@ -28,7 +28,7 @@ class prefab
             return (*this);
         }
 
-        entity_t instantiate(registry &reg)
+        entity_t instantiate(registry &reg) const
         {
             entity_t entity = reg.spawn_entity();
 

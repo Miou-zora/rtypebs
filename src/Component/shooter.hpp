@@ -12,9 +12,9 @@
 namespace component
 {
     struct shooter {
-        shooter(prefab &&_projectile, float _cooldown = 50) : cooldown(_cooldown), projectile(_projectile) {};
+        shooter(const std::string &projectileName_, float _cooldown = 50) : cooldown(_cooldown), projectileName(projectileName_) {};
         float cooldown;
         float timer = 0;
-        prefab projectile;
+        std::string projectileName;
     };
 };

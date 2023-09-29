@@ -166,6 +166,19 @@ namespace component
                 path_list.push_back(pattern);
         }
 
+        void add_pattern(list_of_pattern pattern)
+        {
+            for (auto &&pat : pattern)
+                add_pattern(pat);
+        }
+
+        template <class Pattern, typename... Args>
+        path &add_pattern(Args... args)
+        {
+            add_pattern(std::make_shared<Pattern>(args...));
+            return (*this);
+        }
+
         void update(float dt)
         {
             if (path_list.empty())

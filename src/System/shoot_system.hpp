@@ -10,6 +10,7 @@
 #include "registry.hpp"
 #include "shooter.hpp"
 #include "indexed_zipper.hpp"
+#include "PrefabManager.hpp"
 
 void shoot_system(registry &reg,
                   sparse_array<component::shooter> &shooters)
@@ -21,7 +22,7 @@ void shoot_system(registry &reg,
         if (shooter.value().timer >= shooter.value().cooldown)
         {
             shooter.value().timer -= shooter.value().cooldown;
-            entity_t proj = shooter.value().projectile.instantiate(reg);
+            entity_t proj = PrefabManager::get_instance().Instantiate(shooter.value().projectileName, reg);
             if (reg.get_components<component::position>()[index].has_value() &&
                 reg.get_components<component::position>()[proj].has_value())
             {
