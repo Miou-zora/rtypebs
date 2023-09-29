@@ -95,14 +95,14 @@ int main(int ac, char **av)
         .add_component<component::collider>(10, 5)
         .add_component<component::displayable_hurtbox>(true)
         .add_component<component::damage>(10)
-        .add_component<component::enemy>(component::enemy())
-        .add_component<component::projectile>(component::projectile())
+        .add_component<component::enemy>()
+        .add_component<component::projectile>()
         .add_component<component::path>(component::path().add_pattern<infinite_linear_movement>(vector<float>(-1, 0), 300));
 
     entity_t enemy = reg.spawn_entity();
-    reg.emplace_component<component::position>(enemy, 200, 200);
-    reg.emplace_component<component::velocity>(enemy, 0, 0);
-    reg.emplace_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
+    reg.add_component<component::position>(enemy, component::position(200, 200));
+    reg.add_component<component::velocity>(enemy, component::velocity(0, 0));
+    reg.add_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
     p.add_pattern<linear_movement>(1, vector<float>(300, 0))
@@ -116,10 +116,10 @@ int main(int ac, char **av)
     reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
 
     entity_t projectile = reg.spawn_entity();
-    reg.emplace_component<component::position>(projectile, 1000, 200);
-    reg.emplace_component<component::velocity>(projectile, 0, 0);
+    reg.add_component<component::position>(projectile, component::position(1000, 200));
+    reg.add_component<component::velocity>(projectile, component::velocity(0, 0));
     reg.add_component<component::collider>(projectile, component::collider(10, 5));
-    reg.emplace_component<component::displayable_hurtbox>(projectile, component::displayable_hurtbox(true));
+    reg.add_component<component::displayable_hurtbox>(projectile, component::displayable_hurtbox(true));
     reg.add_component<component::damage>(projectile, component::damage(10));
     reg.add_component<component::enemy>(projectile, component::enemy());
     reg.add_component<component::projectile>(projectile, component::projectile());
@@ -131,7 +131,7 @@ int main(int ac, char **av)
         .add_component<component::position>(100, 100)
         .add_component<component::velocity>(0, 0)
         .add_component<component::displayable_hurtbox>(true)
-        .add_component<component::collider>(component::collider(square_prefab_drawable.Drawable.width * square_prefab_drawable.scale, square_prefab_drawable.Drawable.height * square_prefab_drawable.scale))
+        .add_component<component::collider>(component::collider(square_prefab_drawable.get_size()))
         .add_component<component::drawable>(square_prefab_drawable);
 
     entity_t square = PrefabManager::get_instance().Instantiate("square_prefab", reg);
@@ -141,32 +141,21 @@ int main(int ac, char **av)
     PrefabManager::get_instance().Instantiate("square_prefab", reg);
 
     entity_t sphere = reg.spawn_entity();
-    reg.emplace_component<component::position>(sphere, 700, 700);
-    reg.emplace_component<component::velocity>(sphere, 0, 0);
-    reg.emplace_component<component::displayable_hurtbox>(sphere, component::displayable_hurtbox(true));
+    reg.add_component<component::position>(sphere, component::position(700, 700));
+    reg.add_component<component::velocity>(sphere, component::velocity(0, 0));
+    reg.add_component<component::displayable_hurtbox>(sphere, component::displayable_hurtbox(true));
     component::animation sphere_animation;
     sphere_animation.texture = AssetsManager::get_instance().get_texture("sphere");
     sphere_animation.scale = 2;
     sphere_animation.source_rect = Rectangle{0, 0, 16, 16};
-    // 12
-    sphere_animation.frames.push_back(vector<int>(1, 1));
-    sphere_animation.frames.push_back(vector<int>(18, 1));
-    sphere_animation.frames.push_back(vector<int>(35, 1));
-    sphere_animation.frames.push_back(vector<int>(52, 1));
-    sphere_animation.frames.push_back(vector<int>(69, 1));
-    sphere_animation.frames.push_back(vector<int>(86, 1));
-    sphere_animation.frames.push_back(vector<int>(103, 1));
-    sphere_animation.frames.push_back(vector<int>(120, 1));
-    sphere_animation.frames.push_back(vector<int>(137, 1));
-    sphere_animation.frames.push_back(vector<int>(154, 1));
-    sphere_animation.frames.push_back(vector<int>(171, 1));
-    sphere_animation.frames.push_back(vector<int>(188, 1));
+    for (std::size_t i = 0; i < 12; i++) {
+        sphere_animation.frames.push_back(vector<int>(i * 17 + 1, 1));
+        sphere_animation.frame_times.push_back(0.1);
+    }
     sphere_animation.current_frame = 0;
     sphere_animation.time = 0;
     sphere_animation.loop = true;
     sphere_animation.finished = false;
-    for (std::size_t i = 0; i < sphere_animation.frames.size(); i++)
-        sphere_animation.frame_times.push_back(0.1);
     reg.add_component<component::collider>(sphere, component::collider(sphere_animation.source_rect.width * sphere_animation.scale, sphere_animation.source_rect.height * sphere_animation.scale));
     reg.add_component<component::animation>(sphere, std::move(sphere_animation));
 

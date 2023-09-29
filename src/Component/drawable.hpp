@@ -19,6 +19,11 @@ namespace component
         drawable(Texture2D _drawable, float _scale = 1) : Drawable(_drawable), scale(_scale) {}
         Texture2D Drawable;
         float scale;
+
+        vector<float> get_size() const
+        {
+            return (vector<float>(Drawable.width * scale, Drawable.height * scale));
+        }
     };
 };
 
