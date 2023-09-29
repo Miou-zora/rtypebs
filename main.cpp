@@ -25,6 +25,7 @@
 #include "assets_manager.hpp"
 #include "animation_system.hpp"
 #include "PrefabManager.hpp"
+#include "player_shoot_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -46,9 +47,10 @@ int main(int ac, char **av)
     reg.add_system<component::collider, component::displayable_hurtbox, component::position>(hurtbox_display_system);
     reg.add_system<component::collider, component::projectile>(projectile_system);
     reg.add_system<component::velocity, component::path>(path_system);
+    reg.add_system<component::playerShooter, component::controllable>(player_shoot_system);
     reg.add_system<component::shooter>(shoot_system);
     reg.add_system<component::position, component::velocity>(position_system);
-    reg.add_system<component::clickable, component::position, component::collider>(mouse_system());
+    reg.add_system<component::clickable, component::position, component::collider>(mouse_system()); 
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
@@ -64,6 +66,7 @@ int main(int ac, char **av)
     reg.register_component<component::projectile>();
     reg.register_component<component::path>();
     reg.register_component<component::shooter>();
+    reg.register_component<component::playerShooter>();
     reg.register_component<component::clickable>();
     reg.register_component<component::animation>();
 
@@ -85,16 +88,29 @@ int main(int ac, char **av)
     player_control.is_key_down_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_S)); });
     player_control.is_key_left_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_A)); });
     player_control.is_key_right_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_D)); });
+    player_control.is_key_shoot_pressed = std::function<bool()>([]() { return (IsKeyDown(KEY_SPACE)); });
     reg.add_component<component::controllable>(player, std::move(player_control));
     reg.add_component<component::drawable>(player, std::move(player_sprite));
-    reg.emplace_component<component::clickable>(player, component::clickable());
+    reg.add_component<component::playerShooter>(player, component::playerShooter("proj_player_prefab", 0.5));
+    // reg.emplace_component<component::clickable>(player, component::clickable());
+
+    PrefabManager::get_instance().CreatePrefab("proj_player_prefab")
+        .add_component<component::velocity>(0, 0)
+        .add_component<component::position>(0, 0)
+        .add_component<component::collider>(10, 5)
+        .add_component<component::displayable_hurtbox>(true)
+        .add_component<component::damage>(1)
+        .add_component<component::player>()
+        .add_component<component::projectile>()
+        .add_component<component::path>(component::path().add_pattern<infinite_linear_movement>(vector<float>(1, 0), 300));
+
 
     PrefabManager::get_instance().CreatePrefab("proj_enemy_prefab")
         .add_component<component::velocity>(0, 0)
         .add_component<component::position>(0, 0)
         .add_component<component::collider>(10, 5)
         .add_component<component::displayable_hurtbox>(true)
-        .add_component<component::damage>(10)
+        .add_component<component::damage>(1)
         .add_component<component::enemy>()
         .add_component<component::projectile>()
         .add_component<component::path>(component::path().add_pattern<infinite_linear_movement>(vector<float>(-1, 0), 300));
@@ -111,6 +127,7 @@ int main(int ac, char **av)
         .add_pattern<reverse_linear_movement>(vector<float>(0, -100), 100);
     reg.add_component<component::path>(enemy, std::move(p));
     reg.add_component<component::shooter>(enemy, component::shooter("proj_enemy_prefab", 1));
+    reg.add_component<component::health>(enemy, 100);
     component::drawable enemy_sprite = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.5);
     reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
     reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));

@@ -32,6 +32,7 @@ void damage_system(registry &reg,
                     (reg.has_component<component::player>(reg.entity_from_index(index)) &&
                      reg.has_component<component::enemy>(collide_with)))
                 {
+                    std::cout << "Entity " << reg.entity_from_index(index) << " collided with " << collide_with << std::endl;
                     health.value().value -= reg.get_components<component::damage>()[collide_with].value().value;
                     if (reg.has_component<component::projectile>(collide_with))
                         reg.kill_entity(collide_with);

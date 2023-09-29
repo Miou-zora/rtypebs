@@ -18,6 +18,7 @@ namespace component
         std::function<bool(void) /* Why we can't make it const ? */> is_key_down_pressed;
         std::function<bool(void) /* Why we can't make it const ? */> is_key_left_pressed;
         std::function<bool(void) /* Why we can't make it const ? */> is_key_right_pressed;
+        std::function<bool(void) /* Why we can't make it const ? */> is_key_shoot_pressed;
     };
 };
 
