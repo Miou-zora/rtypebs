@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 project(untitled)
 
+if(UNIX)
+  # Add file textension *.bin to all executables on Unix (Linux, OSX, BSD ...)
+  set(CMAKE_EXECUTABLE_SUFFIX ".bin")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Werror -Wextra -Wshadow -Wuninitialized -ldl -lpthread")
 
@@ -20,8 +25,20 @@ set(MAIN "main.cpp")
 find_package(Boost 1.82.0 REQUIRED COMPONENTS system thread filesystem)
 find_package(GTest CONFIG REQUIRED)
 find_package(raylib CONFIG REQUIRED)
+find_package(CMakeRC)
+
+cmrc_add_resource_library(
+    app1-resources
+
+    ALIAS app1::rc
+    NAMESPACE app1
+
+    assets/player.png
+    assets/enemy.png
+)
 
 add_executable(untitled ${MAIN} ${SRC})
+target_link_libraries(untitled app1::rc)
 enable_testing()
 
 set(TEST_MAIN

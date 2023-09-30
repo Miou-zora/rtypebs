@@ -11,6 +11,10 @@
 #include <SFML/Audio.hpp>
 #include <unordered_map>
 #include "raylib.h"
+#include <cmrc/cmrc.hpp>
+#include <cstring>
+
+CMRC_DECLARE(app1);
 
 class assets_manager
 {
@@ -24,7 +28,14 @@ class assets_manager
 
         bool load_texture(const std::string &name, const std::string &path)
         {
-            _textures[name] = LoadTexture(path.c_str());
+            auto fs = cmrc::app1::get_filesystem();
+            auto rose = fs.open(path);
+
+            std::string extension = strrchr(const_cast<char *>(path.c_str()), '.');
+            const unsigned char *data = reinterpret_cast<const unsigned char *>(rose.begin());
+
+            Image image = LoadImageFromMemory(extension.c_str(), data, rose.size());
+            _textures[name] = LoadTextureFromImage(image);
             bool result = _textures[name].id != 0;
             if (result) {
                 std::cout << "Loaded texture " << name << " from " << path << std::endl;
