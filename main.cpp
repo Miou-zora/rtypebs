@@ -116,7 +116,7 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::enemy>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().AddPoint(200, 200));
+        .add_component<component::path>(component::path().AddPoint(-200, 0, component::path::Context::Local));
 
     entity_t enemy = reg.spawn_entity();
     reg.add_component<component::position>(enemy, component::position(200, 200));
@@ -124,12 +124,9 @@ int main(int ac, char **av)
     reg.add_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
     reg.add_component<component::enemy>(enemy, component::enemy());
     component::path p;
-    // p.add_pattern<linear_movement>(1, vector<float>(300, 0))
-    //     .add_pattern<linear_movement>(vector<float>(0, 100), 100)
-    //     .add_pattern<linear_movement>(vector<float>(100, 100), 100)
-    //     .add_pattern<reverse_linear_movement>(vector<float>(0, -100), 100);
-    p.AddPoint(400, 200);
-    p.AddPoint(400, 300);
+    p.AddPoint(400, 200)
+     .AddPoint(0, 100, component::path::Context::Local)
+     .AddPoint(100, 100, component::path::Context::Local);
     reg.add_component<component::path>(enemy, std::move(p));
     reg.add_component<component::shooter>(enemy, component::shooter("proj_enemy_prefab", 1));
     reg.add_component<component::health>(enemy, 100);
@@ -188,8 +185,6 @@ int main(int ac, char **av)
         .add_component<component::drawable>(AssetsManager::get_instance().get_texture("enemy"), 0.5)
         .add_component<component::collider>(component::collider(AssetsManager::get_instance().get_texture("enemy").width * 0.5, AssetsManager::get_instance().get_texture("enemy").height * 0.5))
         .add_component<component::path>(component::path()
-            // .add_pattern<linear_movement>(vector<float>(-300, 300), 100)
-            // .add_pattern<linear_movement>(vector<float>(300, 300), 100))
             .AddPoint(300, 300)
             .AddPoint(500, 500)
             .AddPoint(1000, 500)

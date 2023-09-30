@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <ctime>
-#include <cmath>
-#include "vector.hpp"
+// #include <vector>
+// #include <memory>
+// #include <ctime>
+// #include <cmath>
+// #include "vector.hpp"
 
 // class pattern_movement
 // {
@@ -216,28 +216,47 @@
 //     };
 // }
 
+
+#include <vector>
+#include <memory>
+#include <ctime>
+#include <cmath>
+#include "vector.hpp"
+#include "registry.hpp"
+
 namespace component
 {
     struct path
     {
-        using Point = vector<float>;
+        enum class Context
+        {
+            Global,
+            Local
+        };
+
+        using PointType = float;
+        using Point = vector<PointType>;
         path(float speed_ = 100, std::vector<Point> path_ = std::vector<Point>()) : list_of_points(path_), speed(speed_) {};
         ~path() = default;
         path(const path &other): list_of_points(other.list_of_points), speed(other.speed), destroyAtEnd(other.destroyAtEnd) {};
         path &operator=(const path &other) = default;
 
-        template <typename... Args>
-        path &AddPoint(Args... args)
+        path &AddPoint(const Point &point, path::Context context = path::Context::Global)
         {
-            list_of_points.push_back(Point(args...));
+            if (context == path::Context::Global)
+                list_of_points.push_back(point);
+            else if (context == path::Context::Local) {
+                if (list_of_points.empty())
+                    list_of_points.push_back(point);
+                else
+                    list_of_points.push_back(list_of_points.back() + point);
+            }
             return (*this);
         }
 
-        path &AddPoints(const std::vector<Point> &points)
+        path &AddPoint(PointType x, PointType y, path::Context context = path::Context::Global)
         {
-            for (auto &&point : points)
-                AddPoint(point);
-            return (*this);
+            return (AddPoint(Point(x, y), context));
         }
 
         path &AddPoints(const path &other)
