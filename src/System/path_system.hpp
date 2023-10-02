@@ -24,27 +24,35 @@ void path_system(registry &reg,
         if (path.value().list_of_points.empty())
             continue;
         component::path::Point &current_point = path.value().list_of_points[0];
-        vector<float> vectorToNextPoint = vector<float>::getVector(pos.value().Position, current_point);
-        if (current_point.distance(pos.value().Position) >= (vectorToNextPoint.normalized() * path.value().speed * deltaTime).get_length())
+        vector<float> vectorToNextPoint = vector<float>::getVector(pos.value().Position, current_point.first);
+        if (current_point.second == component::path::Referential::Entity)
+            vectorToNextPoint = current_point.first;
+        if (current_point.first.distance(pos.value().Position) >= (vectorToNextPoint.normalized() * path.value().speed * deltaTime).get_length())
         {
             vel.value().Velocity = vectorToNextPoint.normalized() * path.value().speed * deltaTime;
-            if (path.value().list_of_points.empty())
-                continue;
+            if (current_point.second == component::path::Referential::Entity)
+                current_point.first -= vel.value().Velocity;
         }
         else
         {
             if (path.value().list_of_points.size() == 1) {
-                vel.value().Velocity = current_point - pos.value().Position;
+                vel.value().Velocity = vectorToNextPoint;
                 if (path.value().destroyAtEnd) {
                     reg.kill_entity(reg.entity_from_index(i));
                     continue;
                 }
             } else {
-                vector<float> overflowValue = (current_point - pos.value().Position).normalized() * path.value().speed * deltaTime - vectorToNextPoint;
-                vectorToNextPoint += vector<float>::getVector(path.value().list_of_points[0], path.value().list_of_points[1]).normalized() * overflowValue.get_length();
+                vector<float> overflowValue = (current_point.first - pos.value().Position).normalized() * path.value().speed * deltaTime - vectorToNextPoint;
+                vectorToNextPoint += vector<float>::getVector(path.value().list_of_points[0].first, path.value().list_of_points[1].first).normalized() * overflowValue.get_length();
                 vel.value().Velocity = vectorToNextPoint;
             }
             path.value().list_of_points.erase(path.value().list_of_points.begin());
         }
+        if (component::path::Referential::Entity == current_point.second && current_point.first.get_length() <= 1)
+            path.value().list_of_points.erase(path.value().list_of_points.begin());
+        if (component::path::Referential::World == current_point.second && (current_point.first + vel.value().Velocity).distance(pos.value().Position) <= 1)
+            path.value().list_of_points.erase(path.value().list_of_points.begin());
+        if (path.value().list_of_points.empty() && path.value().destroyAtEnd)
+            reg.kill_entity(reg.entity_from_index(i));
     }
 }

@@ -105,7 +105,7 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::player>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().AddPoint(-300, 0));
+        .add_component<component::path>(component::path().AddPoint(2000, 0, component::path::Context::Global, component::path::Referential::Entity).SetDestroyAtEnd(true));
 
 
     PrefabManager::get_instance().CreatePrefab("proj_enemy_prefab")
@@ -116,7 +116,7 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::enemy>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().AddPoint(-200, 0, component::path::Context::Local));
+        .add_component<component::path>(component::path().AddPoint(-200, 0, component::path::Context::Global, component::path::Referential::Entity).SetDestroyAtEnd(true));
 
     entity_t enemy = reg.spawn_entity();
     reg.add_component<component::position>(enemy, component::position(200, 200));

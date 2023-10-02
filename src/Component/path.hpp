@@ -234,29 +234,41 @@ namespace component
             Local
         };
 
+        enum class Referential
+        {
+            World,
+            Entity
+        };
+
         using PointType = float;
-        using Point = vector<PointType>;
+        using Point = std::pair<vector<PointType>, path::Referential>;
         path(float speed_ = 100, std::vector<Point> path_ = std::vector<Point>()) : list_of_points(path_), speed(speed_) {};
         ~path() = default;
         path(const path &other): list_of_points(other.list_of_points), speed(other.speed), destroyAtEnd(other.destroyAtEnd) {};
         path &operator=(const path &other) = default;
 
-        path &AddPoint(const Point &point, path::Context context = path::Context::Global)
+        path &AddPoint(const vector<PointType> &point, path::Context context = path::Context::Global, path::Referential referential = path::Referential::World)
         {
             if (context == path::Context::Global)
-                list_of_points.push_back(point);
+                list_of_points.push_back(Point(point, referential));
             else if (context == path::Context::Local) {
                 if (list_of_points.empty())
-                    list_of_points.push_back(point);
+                    list_of_points.push_back(Point(point, referential));
                 else
-                    list_of_points.push_back(list_of_points.back() + point);
+                    list_of_points.push_back(Point(list_of_points.back().first + point, referential));
             }
             return (*this);
         }
 
-        path &AddPoint(PointType x, PointType y, path::Context context = path::Context::Global)
+        path &AddPoint(PointType x, PointType y, path::Context context = path::Context::Global, path::Referential referential = path::Referential::World)
         {
-            return (AddPoint(Point(x, y), context));
+            return (AddPoint(vector<PointType>(x, y), context, referential));
+        }
+
+        path &AddPoint(const Point &point)
+        {
+            list_of_points.push_back(point);
+            return (*this);
         }
 
         path &AddPoints(const path &other)
