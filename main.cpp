@@ -27,6 +27,7 @@
 #include "PrefabManager.hpp"
 #include "player_shoot_system.hpp"
 #include "spawner_system.hpp"
+#include "health_system.hpp"
 
 int main(int ac, char **av)
 {
@@ -53,6 +54,7 @@ int main(int ac, char **av)
     reg.add_system<component::position, component::velocity>(position_system);
     reg.add_system<component::clickable, component::position, component::collider>(mouse_system());
     reg.add_system<component::Spawner>(spawner_system());
+    reg.add_system<component::health>(health_system);
     // reg.add_system<component::position, component::velocity>(logging_system); //* DEBUG
 
     reg.register_component<component::position>();
@@ -95,7 +97,7 @@ int main(int ac, char **av)
     reg.add_component<component::controllable>(player, std::move(player_control));
     reg.add_component<component::drawable>(player, std::move(player_sprite));
     reg.add_component<component::playerShooter>(player, component::playerShooter("proj_player_prefab", 0.5));
-    // reg.emplace_component<component::clickable>(player, component::clickable());
+    reg.emplace_component<component::clickable>(player, component::clickable());
 
     PrefabManager::get_instance().CreatePrefab("proj_player_prefab")
         .add_component<component::velocity>(0, 0)
@@ -105,7 +107,7 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::player>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().AddPoint(2000, 0, component::path::Context::Global, component::path::Referential::Entity).SetDestroyAtEnd(true));
+        .add_component<component::path>(component::path(500.F).AddPoint(2000, 0, component::path::Context::Global, component::path::Referential::Entity).SetDestroyAtEnd(true));
 
 
     PrefabManager::get_instance().CreatePrefab("proj_enemy_prefab")
@@ -116,48 +118,48 @@ int main(int ac, char **av)
         .add_component<component::damage>(1)
         .add_component<component::enemy>()
         .add_component<component::projectile>()
-        .add_component<component::path>(component::path().AddPoint(-200, 0, component::path::Context::Global, component::path::Referential::Entity).SetDestroyAtEnd(true));
+        .add_component<component::path>(component::path(400.f).AddPoint(-2000, 0, component::path::Context::Global, component::path::Referential::Entity).SetDestroyAtEnd(true));
 
-    entity_t enemy = reg.spawn_entity();
-    reg.add_component<component::position>(enemy, component::position(200, 200));
-    reg.add_component<component::velocity>(enemy, component::velocity(0, 0));
-    reg.add_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
-    reg.add_component<component::enemy>(enemy, component::enemy());
-    component::path p;
-    p.AddPoint(400, 200)
-     .AddPoint(0, 100, component::path::Context::Local)
-     .AddPoint(100, 100, component::path::Context::Local);
-    reg.add_component<component::path>(enemy, std::move(p));
-    reg.add_component<component::shooter>(enemy, component::shooter("proj_enemy_prefab", 1));
-    reg.add_component<component::health>(enemy, 100);
-    component::drawable enemy_sprite = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.5);
-    reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
-    reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
+    // entity_t enemy = reg.spawn_entity();
+    // reg.add_component<component::position>(enemy, component::position(200, 200));
+    // reg.add_component<component::velocity>(enemy, component::velocity(0, 0));
+    // reg.add_component<component::displayable_hurtbox>(enemy, component::displayable_hurtbox(true));
+    // reg.add_component<component::enemy>(enemy, component::enemy());
+    // component::path p;
+    // p.AddPoint(400, 200)
+    //  .AddPoint(0, 100, component::path::Context::Local)
+    //  .AddPoint(100, 100, component::path::Context::Local);
+    // reg.add_component<component::path>(enemy, std::move(p));
+    // reg.add_component<component::shooter>(enemy, component::shooter("proj_enemy_prefab", 1));
+    // reg.add_component<component::health>(enemy, 100);
+    // component::drawable enemy_sprite = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.5);
+    // reg.add_component<component::collider>(enemy, component::collider(enemy_sprite.Drawable.width * enemy_sprite.scale, enemy_sprite.Drawable.height * enemy_sprite.scale));
+    // reg.add_component<component::drawable>(enemy, std::move(enemy_sprite));
 
-    entity_t projectile = reg.spawn_entity();
-    reg.add_component<component::position>(projectile, component::position(1000, 200));
-    reg.add_component<component::velocity>(projectile, component::velocity(0, 0));
-    reg.add_component<component::collider>(projectile, component::collider(10, 5));
-    reg.add_component<component::displayable_hurtbox>(projectile, component::displayable_hurtbox(true));
-    reg.add_component<component::damage>(projectile, component::damage(10));
-    reg.add_component<component::enemy>(projectile, component::enemy());
-    reg.add_component<component::projectile>(projectile, component::projectile());
-    reg.add_component<component::path>(projectile, std::move(component::path().AddPoint(200, 200)));
+    // entity_t projectile = reg.spawn_entity();
+    // reg.add_component<component::position>(projectile, component::position(1000, 200));
+    // reg.add_component<component::velocity>(projectile, component::velocity(0, 0));
+    // reg.add_component<component::collider>(projectile, component::collider(10, 5));
+    // reg.add_component<component::displayable_hurtbox>(projectile, component::displayable_hurtbox(true));
+    // reg.add_component<component::damage>(projectile, component::damage(10));
+    // reg.add_component<component::enemy>(projectile, component::enemy());
+    // reg.add_component<component::projectile>(projectile, component::projectile());
+    // reg.add_component<component::path>(projectile, std::move(component::path().AddPoint(200, 200)));
 
 
-    component::drawable square_prefab_drawable = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.4);
-    PrefabManager::get_instance().CreatePrefab("square_prefab")
-        .add_component<component::position>(100, 100)
-        .add_component<component::velocity>(0, 0)
-        .add_component<component::displayable_hurtbox>(true)
-        .add_component<component::collider>(component::collider(square_prefab_drawable.get_size()))
-        .add_component<component::drawable>(square_prefab_drawable);
+    // component::drawable square_prefab_drawable = component::drawable(AssetsManager::get_instance().get_texture("enemy"), 0.4);
+    // PrefabManager::get_instance().CreatePrefab("square_prefab")
+    //     .add_component<component::position>(100, 100)
+    //     .add_component<component::velocity>(0, 0)
+    //     .add_component<component::displayable_hurtbox>(true)
+    //     .add_component<component::collider>(component::collider(square_prefab_drawable.get_size()))
+    //     .add_component<component::drawable>(square_prefab_drawable);
 
-    entity_t square = PrefabManager::get_instance().Instantiate("square_prefab", reg);
-    reg.get_components<component::position>()[square].value().Position.x = 500;
-    reg.get_components<component::position>()[square].value().Position.y = 500;
+    // entity_t square = PrefabManager::get_instance().Instantiate("square_prefab", reg);
+    // reg.get_components<component::position>()[square].value().Position.x = 500;
+    // reg.get_components<component::position>()[square].value().Position.y = 500;
 
-    PrefabManager::get_instance().Instantiate("square_prefab", reg);
+    // PrefabManager::get_instance().Instantiate("square_prefab", reg);
 
     entity_t sphere = reg.spawn_entity();
     reg.add_component<component::position>(sphere, component::position(700, 700));
@@ -179,22 +181,26 @@ int main(int ac, char **av)
     reg.add_component<component::animation>(sphere, std::move(sphere_animation));
 
     PrefabManager::get_instance().CreatePrefab("diagonal_enemy")
-        .add_component<component::position>(500, 100)
+        .add_component<component::position>(700, 100)
         .add_component<component::velocity>(0, 0)
         .add_component<component::displayable_hurtbox>(true)
-        .add_component<component::drawable>(AssetsManager::get_instance().get_texture("enemy"), 0.5)
-        .add_component<component::collider>(component::collider(AssetsManager::get_instance().get_texture("enemy").width * 0.5, AssetsManager::get_instance().get_texture("enemy").height * 0.5))
-        .add_component<component::path>(component::path()
-            .AddPoint(300, 300)
-            .AddPoint(500, 500)
-            .AddPoint(1000, 500)
+        .add_component<component::drawable>(AssetsManager::get_instance().get_texture("enemy"), 0.4)
+        .add_component<component::collider>(component::collider(AssetsManager::get_instance().get_texture("enemy").width * 0.4, AssetsManager::get_instance().get_texture("enemy").height * 0.4))
+        .add_component<component::path>(component::path(250.f)
+            .AddPoint(500, 350)
+            .AddPoint(700, 600)
+            .AddPoint(1500, 600)
             .SetDestroyAtEnd(true))
-        .add_component<component::shooter>(component::shooter("proj_enemy_prefab", 1));
+        .add_component<component::shooter>(component::shooter("proj_enemy_prefab", 1))
+        .add_component<component::health>(1)
+        .add_component<component::enemy>();
 
     entity_t spawner = reg.spawn_entity();
     component::Spawner spawner_component;
     spawner_component._spawnList.push_back(std::make_pair(2, "diagonal_enemy"));
-    spawner_component._spawnList.push_back(std::make_pair(4, "diagonal_enemy"));
+    spawner_component._spawnList.push_back(std::make_pair(0.7, "diagonal_enemy"));
+    spawner_component._spawnList.push_back(std::make_pair(0.7, "diagonal_enemy"));
+    spawner_component._spawnList.push_back(std::make_pair(0.7, "diagonal_enemy"));
     reg.add_component<component::Spawner>(spawner, std::move(spawner_component));
 
     std::cout << "Prefabs: " << PrefabManager::get_instance() << std::endl;

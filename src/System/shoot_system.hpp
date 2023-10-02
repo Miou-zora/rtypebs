@@ -15,7 +15,7 @@
 void shoot_system(registry &reg,
                   sparse_array<component::shooter> &shooters)
 {
-    (void)reg; // TODO: add delta time
+    (void)reg;
     for (auto &&[index, shooter] : indexed_zipper(shooters))
     {
         shooter.value().timer += reg.get_delta_time();

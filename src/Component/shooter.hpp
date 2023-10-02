@@ -11,7 +11,7 @@
 
 namespace component
 {
-    class shooter {
+    class   shooter {
         public:
             shooter(const std::string &projectileName_, float _cooldown = 0.5) : cooldown(_cooldown), projectileName(projectileName_) {};
             float cooldown;
